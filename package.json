@@ -7,7 +7,7 @@
     "watch": "tsc -w",
     "dev": "nodemon --inspect dist/index.js",
     "build": "tsc",
-    "start": "nodemon dist/index.js",
+    "start": "nodemon src/index.ts",
     "jest": "jest -i",
     "jest:coverage": "jest -i --coverage"
   },
