@@ -3,14 +3,14 @@
     "name": "it-incubator-backend",
     "builds": [
       {
-        "src": "hw_1/src/index.ts",
+        "src": "src/index.ts",
         "use": "@vercel/node"
       }
     ],
     "routes": [
       {
         "src": "/(.*)",
-        "dest": "hw_1/src/index.ts"
+        "dest": "src/index.ts"
       }
     ]
   }
