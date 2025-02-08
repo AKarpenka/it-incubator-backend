@@ -1,11 +1,10 @@
-import { Resolutions } from "./videos/constants"
-import { TDataBase } from "./videos/types"
-
+import { TDataBase } from "./types";
+import { Resolutions } from "./videos/constants";
 
 export const db: TDataBase = {
     videos: [
         {
-            id: '0',
+            id: 0,
             title: "string",
             author: "string",
             canBeDownloaded: true,
@@ -18,20 +17,3 @@ export const db: TDataBase = {
         }
     ],
 }
-
-
-
-
-
-// функция для быстрой очистки/заполнения базы данных для тестов
-// export const setDB = (dataset?: Partial<DBType>) => {
-//     if (!dataset) { // если в функцию ничего не передано - то очищаем базу данных
-//         db.videos = []
-//         // db.some = []
-//         return
-//     }
-
-//     // если что-то передано - то заменяем старые значения новыми
-//     db.videos = dataset.videos || db.videos
-//     // db.some = dataset.some || db.some
-// }

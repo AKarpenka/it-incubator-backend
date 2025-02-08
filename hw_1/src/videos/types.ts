@@ -1,9 +1,10 @@
+import { TErrorMessage } from "../types";
 import { Resolutions } from "./constants";
 
 export type ResolutionsString = keyof typeof Resolutions;
 
 export type TVideoDB = {
-    id?: string;
+    id?: number;
     title: string;
     author: string;
     canBeDownloaded?: boolean;
@@ -13,15 +14,6 @@ export type TVideoDB = {
     availableResolutions?: Resolutions[];
 }
 
-export type TDataBase = {
-    videos: TVideoDB[];
-}
-
-export type TErrorMessages = {
-    message: string,
-    field: string,
-}
-
 export type TOutputCreateVideoError = {
-    errorsMessages: TErrorMessages[]
+    errorsMessages: TErrorMessage[]
 }

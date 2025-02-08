@@ -1,7 +1,7 @@
 import { Resolutions } from "./constants";
 import { TOutputCreateVideoError, TVideoDB } from "./types";
 
-export const createVideoValidation = (video: TVideoDB) => {
+export const createOrUpdateVideoValidation = (video: TVideoDB) => {
     const errors: TOutputCreateVideoError = {
         errorsMessages: []
     }
