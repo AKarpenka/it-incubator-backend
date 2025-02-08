@@ -3,14 +3,20 @@
     "name": "it-incubator-backend",
     "builds": [
       {
-        "src": "src/index.ts",
-        "use": "@vercel/node"
+        "src": "dist/index.js",
+        "use": "@vercel/node",
+        "config": { "includeFiles": ["dist/**"] }
       }
     ],
     "routes": [
       {
         "src": "/(.*)",
-        "dest": "src/index.ts"
+        "dest": "dist/index.js",
+        "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        "headers": {
+          "Access-Control-Allow-Origin": "*",
+          "Cache-Control": "max-age=0, s-maxage=86400, stale-while-revalidate"
+        }
       }
     ]
   }
