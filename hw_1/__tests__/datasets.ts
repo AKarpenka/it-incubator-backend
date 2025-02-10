@@ -5,8 +5,8 @@ import { TVideoDB } from '../src/videos/types';
 
 export const newVideoWithIdMock: TVideoDB = {
     id: 1,
-    title: 't' + Date.now() + Math.random(),
-    author: 'a' + Date.now() + Math.random(),
+    title: 't',
+    author: 'a',
     canBeDownloaded: false,
     minAgeRestriction: null,
     createdAt: new Date().toISOString(),

@@ -29,6 +29,13 @@ export const createOrUpdateVideoValidation = (video: TVideoDB) => {
         })
     }
 
+    if(video.author && video.author.length > 20) {
+        errors.errorsMessages.push({
+            message: 'error: maxLength: 20', 
+            field: 'author'
+        })
+    }
+
     if(!video.title) {
         errors.errorsMessages.push({
             message: 'error: title is required', 
@@ -36,7 +43,14 @@ export const createOrUpdateVideoValidation = (video: TVideoDB) => {
         })
     }
 
-    if(typeof video.canBeDownloaded === 'string') {
+    if(video.title && video.title.length > 40) {
+        errors.errorsMessages.push({
+            message: 'error: maxLength: 40', 
+            field: 'title'
+        })
+    }
+
+    if(video.canBeDownloaded && typeof video.canBeDownloaded === 'string') {
         errors.errorsMessages.push({
             message: 'canBeDownloaded should be boolean', 
             field: 'canBeDownloaded'

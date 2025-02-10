@@ -49,8 +49,8 @@ describe('/videos', () => {
         setDB();
 
         const newVideo: TVideoDB = {
-            title: 't' + Date.now() + Math.random(),
-            author: 'a' + Date.now() + Math.random(),
+            title: 't',
+            author: 'a',
             availableResolutions: [Resolutions.P240],
         };
 
@@ -64,8 +64,8 @@ describe('/videos', () => {
 
     it('createVideos: validation availableResolutions fail', async () => {
         const newVideo: TVideoDB = {
-            title: 't' + Date.now() + Math.random(),
-            author: 'a' + Date.now() + Math.random(),
+            title: 't',
+            author: 'a',
         };
 
         const res = await req
@@ -87,8 +87,8 @@ describe('/videos', () => {
 
     it('createVideos: validation minAgeRestriction fail', async () => {
         const newVideo: TVideoDB = {
-            title: 't' + Date.now() + Math.random(),
-            author: 'a' + Date.now() + Math.random(),
+            title: 't',
+            author: 'a',
             minAgeRestriction: 33,
             availableResolutions: [Resolutions.P240],
         };
@@ -112,8 +112,8 @@ describe('/videos', () => {
 
     it('createVideos: validation minAgeRestriction fail', async () => {
         const newVideo: any = {
-            title: 't' + Date.now() + Math.random(),
-            author: 'a' + Date.now() + Math.random(),
+            title: 't',
+            author: 'a',
             canBeDownloaded: 'qqqq',
             availableResolutions: [Resolutions.P240],
         };
@@ -168,7 +168,7 @@ describe('/videos', () => {
         const newVideo: TVideoDB = {
             id: 1,
             title: 't1111',
-            author: 'a' + Date.now() + Math.random(),
+            author: 'a',
             canBeDownloaded: false,
             minAgeRestriction: null,
             createdAt: new Date().toISOString(),
@@ -190,8 +190,8 @@ describe('/videos', () => {
 
     it('updateVideoById: validation availableResolutions fail', async () => {
         const newVideo: TVideoDB = {
-            title: 't' + Date.now() + Math.random(),
-            author: 'a' + Date.now() + Math.random(),
+            title: 't',
+            author: 'a',
         };
 
         const res = await req
@@ -213,8 +213,8 @@ describe('/videos', () => {
 
     it('updateVideoById: validation minAgeRestriction fail', async () => {
         const newVideo: TVideoDB = {
-            title: 't' + Date.now() + Math.random(),
-            author: 'a' + Date.now() + Math.random(),
+            title: 't',
+            author: 'a',
             minAgeRestriction: 33,
             availableResolutions: [Resolutions.P240],
         };
@@ -261,10 +261,59 @@ describe('/videos', () => {
         
         expect(res.body).toEqual(errorsMessages);
     });
+
+    it('updateVideoById: validation of maxLenth title failed', async () => {
+        const newVideo: any = {
+            availableResolutions: [Resolutions.P240],
+            title: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            author: 'a',
+        };
+
+        const res = await req
+            .put(SETTINGS.PATH.VIDEOS +'/1')
+            .send(newVideo)
+            .expect(400)
+
+        const errorsMessages = {
+            errorsMessages: [
+                {
+                    message: 'error: maxLength: 40', 
+                    field: 'title'
+                }
+            ]
+        };
+        
+        expect(res.body).toEqual(errorsMessages);
+    });
+
+    it('updateVideoById: validation of maxLenth author failed', async () => {
+        const newVideo: any = {
+            availableResolutions: [Resolutions.P240],
+            title: 'a',
+            author: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        };
+
+        const res = await req
+            .put(SETTINGS.PATH.VIDEOS +'/1')
+            .send(newVideo)
+            .expect(400)
+
+        const errorsMessages = {
+            errorsMessages: [
+                {
+                    message: 'error: maxLength: 20', 
+                    field: 'author'
+                }
+            ]
+        };
+        
+        expect(res.body).toEqual(errorsMessages);
+    });
+
     it('updateVideoById: validation canBeDownloaded fail', async () => {
         const newVideo: any = {
-            title: 't' + Date.now() + Math.random(),
-            author: 'a' + Date.now() + Math.random(),
+            title: 't',
+            author: 'a',
             canBeDownloaded: 'qqq',
             availableResolutions: [Resolutions.P240],
         };

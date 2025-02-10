@@ -33,23 +33,25 @@ export const videosController = {
             res
                 .status(400)
                 .json(errors);
+        } else {
+            const newVideo: TVideoDB = {
+                ...req.body,
+                id: Math.round(Date.now() + Math.random()),
+                canBeDownloaded: req.body.canBeDownloaded ?? false,
+                minAgeRestriction: req.body.minAgeRestriction ?? null,
+                createdAt: req.body.createdAt ?? new Date().toISOString(),
+                publicationDate: req.body.publicationDate ?? getNextDayInISOString(req.body.createdAt ?? new Date().toISOString()),
+                availableResolutions: req.body.availableResolutions,
+            };
+
+            db.videos = [...db.videos, newVideo];
+
+            res
+                .status(201)
+                .json(newVideo)
         }
 
-        const newVideo: TVideoDB = {
-            ...req.body,
-            id: Math.round(Date.now() + Math.random()),
-            canBeDownloaded: req.body.canBeDownloaded ?? false,
-            minAgeRestriction: req.body.minAgeRestriction ?? null,
-            createdAt: req.body.createdAt ?? new Date().toISOString(),
-            publicationDate: req.body.publicationDate ?? getNextDayInISOString(req.body.createdAt ?? new Date().toISOString()),
-            availableResolutions: req.body.availableResolutions,
-        };
-
-        db.videos = [...db.videos, newVideo];
-
-        res
-            .status(201)
-            .json(newVideo)
+        
     },
     updateVideoById: (req: Request, res: Response) => {
         const videos = db.videos;
