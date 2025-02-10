@@ -57,6 +57,13 @@ export const createOrUpdateVideoValidation = (video: TVideoDB) => {
         })
     }
 
+    if(video.publicationDate && typeof video.publicationDate !== 'string') {
+        errors.errorsMessages.push({
+            message: 'publicationDate should be ISO String', 
+            field: 'publicationDate'
+        })
+    }
+
     return errors;
 }
 
