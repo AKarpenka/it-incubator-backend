@@ -17,3 +17,16 @@ export const db: TDataBase = {
         }
     ],
 }
+
+// функция для быстрой очистки/заполнения базы данных для тестов
+export const setDB = (dataset?: Partial<TDataBase>) => {
+    // если в функцию ничего не передано - то очищаем базу данных
+    if (!dataset) {
+        Object.keys(db).forEach((key) => db[key as keyof TDataBase] = []);
+        
+        return;
+    }
+
+    // если что-то передано - то заменяем старые значения новыми
+    Object.keys(db).forEach((key) => db[key as keyof TDataBase] = dataset.videos || db.videos);
+}
