@@ -66,7 +66,10 @@ export const videosController = {
                     .status(400)
                     .json(errors);
             } else {
-                videos[videoIndex] = req.body;
+                videos[videoIndex] = {
+                    ...req.body,
+                    id,
+                };
 
                 res
                     .status(204)
