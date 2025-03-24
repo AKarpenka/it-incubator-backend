@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { SETTINGS } from "../settings";
+import { SETTINGS } from "../../settings";
 
 const TYPE_OF_AUTH = `Basic`;
 

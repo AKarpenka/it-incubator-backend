@@ -1,4 +1,3 @@
-import { Request, Response } from "express";
 import { db } from "../../db/db";
 import { TBlog } from "TDataBase";
 import { v4 as uuid } from "uuid";

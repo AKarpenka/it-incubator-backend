@@ -1,13 +1,10 @@
 import { Router, Request, Response } from "express";
 import { blogsRepository } from "./blogs-repository";
-import { blogsValidatorMiddleware } from "../../middlewares/blogs-validators-middleware";
-import { errorsResultMiddleware } from "../../middlewares/errors-result-middleware";
-import { authorizationMiddleware } from "../../middlewares/basic-auth-middleware";
+import { blogsValidatorMiddleware } from "../../middlewares/validation/blogs-validators-middleware";
+import { errorsResultMiddleware } from "../../middlewares/validation/errors-result-middleware";
+import { authorizationMiddleware } from "../../middlewares/auth/basic-auth-middleware";
 
 export const blogsRouter = Router();
-
-blogsRouter.use(...blogsValidatorMiddleware);
-blogsRouter.use(errorsResultMiddleware);
 
 blogsRouter.get('/', (req: Request, res: Response) => {
     const blogs = blogsRepository.getBlogs();
@@ -31,6 +28,26 @@ blogsRouter.get('/:id', (req: Request, res: Response) => {
     }
 });
 
+
+blogsRouter.delete('/:id', 
+    authorizationMiddleware, 
+    (req: Request, res: Response) => {
+    const deletedBlogId = blogsRepository.deleteVideoById(req.params.id);
+
+    if(deletedBlogId !== null) {
+        res
+            .status(204)
+            .send('Deleted!');
+    } else {
+        res
+            .status(404)
+            .send(`Blog for passed id ${req.params.id} doesn\'t exist`);
+    }
+});
+
+blogsRouter.use(...blogsValidatorMiddleware);
+blogsRouter.use(errorsResultMiddleware);
+
 blogsRouter.post('/', 
     authorizationMiddleware, 
     (req: Request, res: Response) => {
@@ -50,22 +67,6 @@ blogsRouter.put('/:id',
         res
             .status(204)
             .send('Updated!');
-    } else {
-        res
-            .status(404)
-            .send(`Blog for passed id ${req.params.id} doesn\'t exist`);
-    }
-});
-
-blogsRouter.delete('/:id', 
-    authorizationMiddleware, 
-    (req: Request, res: Response) => {
-    const deletedBlogId = blogsRepository.deleteVideoById(req.params.id);
-
-    if(deletedBlogId !== null) {
-        res
-            .status(204)
-            .send('Deleted!');
     } else {
         res
             .status(404)

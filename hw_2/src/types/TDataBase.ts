@@ -5,7 +5,16 @@ export type TBlog = {
     websiteUrl: string,
 }
 
+export type TPost = {
+    id: string,
+    title: string,
+    shortDescription: string,
+    content: string,
+    blogId: string,
+    blogName: string,
+}
+
 export type TDataBase = {
     blogs: TBlog[],
-    posts: any,
+    posts: TPost[],
 }
