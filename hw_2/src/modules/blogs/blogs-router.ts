@@ -45,11 +45,10 @@ blogsRouter.delete('/:id',
     }
 });
 
-blogsRouter.use(...blogsValidatorMiddleware);
-blogsRouter.use(errorsResultMiddleware);
-
 blogsRouter.post('/', 
     authorizationMiddleware, 
+    ...blogsValidatorMiddleware,
+    errorsResultMiddleware,
     (req: Request, res: Response) => {
     const newBlog = blogsRepository.createBlog(req.body);
 
@@ -60,6 +59,8 @@ blogsRouter.post('/',
 
 blogsRouter.put('/:id', 
     authorizationMiddleware, 
+    ...blogsValidatorMiddleware,
+    errorsResultMiddleware,
     (req: Request, res: Response) => {
     const updatedBlog = blogsRepository.updateBlogById(req.params.id, req.body);
 

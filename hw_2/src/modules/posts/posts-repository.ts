@@ -1,11 +1,18 @@
 import { db } from "../../db/db";
 import { TPost } from "TDataBase";
 import { v4 as uuid } from "uuid";
+import { blogsRepository } from "../blogs/blogs-repository";
 
 export const postsRepository = {
     getPosts: (): TPost[] => db.posts,
     getPostById: (id: string): TPost | undefined => db.posts.find(post => post.id === id),
-    createPost: (body: Record<string, string>): TPost => {
+    createPost: (body: Record<string, string>): TPost | undefined => {
+        const blog = blogsRepository.getBlogById(body.blogId);
+
+        if(!blog) {
+            return undefined;
+        }
+
         const newPost: TPost = {
             ...body,
             id: uuid(),
@@ -13,7 +20,7 @@ export const postsRepository = {
             shortDescription: body.shortDescription.trim(),
             content: body.content.trim(),
             blogId: body.blogId.trim(),
-            blogName: body.blogName.trim(),
+            blogName: blog?.name,
         };
 
         db.posts = [...db.posts, newPost];

@@ -44,21 +44,28 @@ postsRouter.delete('/:id',
     }
 });
 
-postsRouter.use(...postsValidatorMiddleware);
-postsRouter.use(errorsResultMiddleware);
-
 postsRouter.post('/', 
     authorizationMiddleware, 
+    ...postsValidatorMiddleware,
+    errorsResultMiddleware,
     (req: Request, res: Response) => {
     const newPost = postsRepository.createPost(req.body);
 
-    res
-        .status(201)
-        .json(newPost)
+    if(newPost) {
+        res
+            .status(201)
+            .json(newPost)
+    } else {
+        res
+            .status(404)
+            .send(`Blog for passed blogId doesn\'t exist`);
+    }
 });
 
 postsRouter.put('/:id', 
     authorizationMiddleware, 
+    ...postsValidatorMiddleware,
+    errorsResultMiddleware,
     (req: Request, res: Response) => {
     const updatedPost = postsRepository.updatePostById(req.params.id, req.body);
 

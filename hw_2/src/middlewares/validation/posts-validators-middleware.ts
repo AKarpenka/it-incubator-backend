@@ -1,4 +1,5 @@
 import { body } from "express-validator";
+import { blogsRepository } from "../../modules/blogs/blogs-repository";
 
 export const postTitleValidator = body('title')
     .isString()
@@ -33,6 +34,12 @@ export const postBlogIdValidator = body('blogId')
     .trim()
     .notEmpty()
     .withMessage('The field blogId should not be empty')
+    .custom(blogId => {
+        const blog = blogsRepository.getBlogById(blogId);
+
+        return !!blog;
+    })
+    .withMessage('no blog')
 
 export const postsValidatorMiddleware = [
     postTitleValidator,

@@ -9,13 +9,19 @@ export const errorsResultMiddleware = (
     const errors = validationResult(req);
 
     if(!errors.isEmpty()) {
+        const errorArray = errors.array({onlyFirstError: true})
+            .map((error) => {
+                if((error as FieldValidationError).path === 'blogId' && error.msg === 'no blog') {
+                    res
+                    .status(404)
+                    .send(`Blog for passed blogId doesn\'t exist`);
+                }
+
+                return { message: error.msg, field: (error as FieldValidationError).path }
+            });
+
         res.status(400).send({
-            errorMessages: 
-                errors
-                    .array({onlyFirstError: true})
-                    .map((error) => {
-                        return { message: error.msg, field: (error as FieldValidationError).path }
-                    })
+            errorsMessages: errorArray
         });
         
         return;
