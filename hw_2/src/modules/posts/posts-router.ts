@@ -6,16 +6,16 @@ import { postsValidatorMiddleware } from '../../middlewares/validation/posts-val
 
 export const postsRouter = Router();
 
-postsRouter.get('/', (req: Request, res: Response) => {
-    const posts = postsRepository.getPosts();
+postsRouter.get('/', async (req: Request, res: Response) => {
+    const posts = await postsRepository.getPosts();
 
     res
         .status(200)
         .json(posts);
 });
 
-postsRouter.get('/:id', (req: Request, res: Response) => {
-    const post = postsRepository.getPostById(req.params.id);
+postsRouter.get('/:id', async (req: Request, res: Response) => {
+    const post = await postsRepository.getPostById(req.params.id);
 
     if(post) {
         res
@@ -30,8 +30,8 @@ postsRouter.get('/:id', (req: Request, res: Response) => {
 
 postsRouter.delete('/:id', 
     authorizationMiddleware, 
-    (req: Request, res: Response) => {
-    const deletedPostId = postsRepository.deletePostById(req.params.id);
+    async (req: Request, res: Response) => {
+    const deletedPostId = await postsRepository.deletePostById(req.params.id);
 
     if(deletedPostId !== null) {
         res
@@ -48,8 +48,8 @@ postsRouter.post('/',
     authorizationMiddleware, 
     ...postsValidatorMiddleware,
     errorsResultMiddleware,
-    (req: Request, res: Response) => {
-    const newPost = postsRepository.createPost(req.body);
+    async (req: Request, res: Response) => {
+    const newPost = await postsRepository.createPost(req.body);
 
     if(newPost) {
         res
@@ -66,8 +66,8 @@ postsRouter.put('/:id',
     authorizationMiddleware, 
     ...postsValidatorMiddleware,
     errorsResultMiddleware,
-    (req: Request, res: Response) => {
-    const updatedPost = postsRepository.updatePostById(req.params.id, req.body);
+    async (req: Request, res: Response) => {
+    const updatedPost = await postsRepository.updatePostById(req.params.id, req.body);
 
     if(updatedPost !== null) {
         res

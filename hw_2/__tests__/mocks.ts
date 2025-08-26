@@ -1,26 +1,38 @@
 import { TBlog, TDataBase, TPost } from '../src/types/TDataBase';
 
+export const mockDB: TDataBase = {
+    blogs: [],
+    posts: [],
+};
+
+const now = new Date().toISOString();
+
 export const blog1: TBlog = {
-    id: new Date().toISOString() + Math.random(),
+    id: 'blog-1',
     name: "n1",
     description: "description-1",
-    websiteUrl: "https://_XzVrOodmeJpO4JfbvLnKnQQekHQyldl5_PV9pZ4BCjIIziOgnj0GFc4pGGPZxiEugUOH.t7bJbiTBnbh020tkB8I8AQ",
+    websiteUrl: "https://example.com/1",
+    createdAt: now,
+    isMembership: false
 } as const;
 
 export const blog7: TBlog = {
-    id: new Date().toISOString() + Math.random(),
+    id: 'blog-7',
     name: "n7",
     description: "description-7",
-    websiteUrl: "https://_XzVrOodmeJpO4JfbvLnKnQQekHQyldl5_PV9pZ4BCjIIziOgnj0GFc4pGGPZxiEugUOH.t7bJbiTBnbh020tkB8I8AQ",
+    websiteUrl: "https://example.com/7",
+    createdAt: now,
+    isMembership: true
 } as const;
 
 export const post1: TPost = {
-    id: new Date().toISOString() + Math.random(),
+    id: 'post-1',
     title: 't1',
     content: 'c1',
     shortDescription: 's1',
     blogId: blog1.id,
-    blogName: 'n1'
+    blogName: blog1.name,
+    createdAt: now
 } as const;
 
 export const dataset1: TDataBase = {
