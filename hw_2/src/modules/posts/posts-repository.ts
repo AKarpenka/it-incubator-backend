@@ -1,16 +1,24 @@
-import { db } from "../../db/db";
+import { getBlogsCollection, getPostsCollection } from "../../db/db";
 import { TPost } from "TDataBase";
 import { v4 as uuid } from "uuid";
 import { blogsRepository } from "../blogs/blogs-repository";
 
 export const postsRepository = {
-    getPosts: (): TPost[] => db.posts,
-    getPostById: (id: string): TPost | undefined => db.posts.find(post => post.id === id),
-    createPost: (body: Record<string, string>): TPost | undefined => {
-        const blog = blogsRepository.getBlogById(body.blogId);
+    getPosts: async (): Promise<TPost[]> => {
+        const postsCollection = getPostsCollection();
+
+        return await postsCollection.find({}).toArray();
+    },
+    getPostById: async (id: string): Promise<TPost | null> => {
+        const postsCollection = getPostsCollection();
+
+        return await postsCollection.findOne({ id });
+    },
+    createPost: async (body: Record<string, string>): Promise<TPost | null> => {
+        const blog = await blogsRepository.getBlogById(body.blogId);
 
         if(!blog) {
-            return undefined;
+            return null;
         }
 
         const newPost: TPost = {
@@ -21,37 +29,34 @@ export const postsRepository = {
             content: body.content.trim(),
             blogId: body.blogId.trim(),
             blogName: blog?.name,
+            createdAt: new Date().toISOString(),
         };
 
-        db.posts = [...db.posts, newPost];
+        const postsCollection = getPostsCollection();
+        await postsCollection.insertOne(newPost);
 
         return newPost;
     },
-    updatePostById: (id: string, body: Record<string, string>): TPost | null => {
-        const { posts } = db;
-        const postIndex = posts.findIndex(post => post.id === id);
+    updatePostById: async (id: string, body: Record<string, string>): Promise<TPost | null> => {
+        const postsCollection = getPostsCollection();
 
-        if(postIndex !== -1) {
-            posts[postIndex] = {
-                ...posts[postIndex],
-                ...body,
-            };
+        const updatedBlog = await postsCollection.findOneAndUpdate(
+            { id },
+            { $set: { ...body } },
+            { returnDocument: 'after' },
+        );
 
-            return posts[postIndex];
-        } else { 
-            return null;
-        }
+        return updatedBlog;
     },
-    deletePostById: (id: string): string | null => {
-        const { posts } = db;
-        const postIndex = posts.findIndex(post => post.id === id);
+    deletePostById: async (id: string): Promise<string | null> => {
+        const postsCollection = getPostsCollection();
 
-        if(postIndex !== -1) {
-            posts.splice(postIndex, 1);
+        const deletedBlog = await postsCollection.deleteOne({ id });
 
-            return id;
-        } else { 
-            return null;
+        if (deletedBlog.deletedCount < 1) {
+            return null
         }
+
+        return id;
     }
 }

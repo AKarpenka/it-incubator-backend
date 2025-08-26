@@ -6,16 +6,16 @@ import { authorizationMiddleware } from "../../middlewares/auth/basic-auth-middl
 
 export const blogsRouter = Router();
 
-blogsRouter.get('/', (req: Request, res: Response) => {
-    const blogs = blogsRepository.getBlogs();
+blogsRouter.get('/', async (req: Request, res: Response) => {
+    const blogs = await blogsRepository.getBlogs();
 
     res
         .status(200)
         .json(blogs);
 });
 
-blogsRouter.get('/:id', (req: Request, res: Response) => {
-    const blog = blogsRepository.getBlogById(req.params.id);
+blogsRouter.get('/:id', async (req: Request, res: Response) => {
+    const blog = await blogsRepository.getBlogById(req.params.id);
 
     if(blog) {
         res
@@ -31,8 +31,8 @@ blogsRouter.get('/:id', (req: Request, res: Response) => {
 
 blogsRouter.delete('/:id', 
     authorizationMiddleware, 
-    (req: Request, res: Response) => {
-    const deletedBlogId = blogsRepository.deleteVideoById(req.params.id);
+    async (req: Request, res: Response) => {
+    const deletedBlogId = await blogsRepository.deleteVideoById(req.params.id);
 
     if(deletedBlogId !== null) {
         res
@@ -49,20 +49,21 @@ blogsRouter.post('/',
     authorizationMiddleware, 
     ...blogsValidatorMiddleware,
     errorsResultMiddleware,
-    (req: Request, res: Response) => {
-    const newBlog = blogsRepository.createBlog(req.body);
+    async (req: Request, res: Response) => {
+        const newBlog = await blogsRepository.createBlog(req.body);
 
-    res
-        .status(201)
-        .json(newBlog)
-});
+        res
+            .status(201)
+            .json(newBlog)
+    }
+);
 
 blogsRouter.put('/:id', 
     authorizationMiddleware, 
     ...blogsValidatorMiddleware,
     errorsResultMiddleware,
-    (req: Request, res: Response) => {
-    const updatedBlog = blogsRepository.updateBlogById(req.params.id, req.body);
+    async (req: Request, res: Response) => {
+    const updatedBlog = await blogsRepository.updateBlogById(req.params.id, req.body);
 
     if(updatedBlog !== null) {
         res

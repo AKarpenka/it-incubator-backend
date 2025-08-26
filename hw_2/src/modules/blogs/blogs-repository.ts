@@ -1,48 +1,54 @@
-import { db } from "../../db/db";
+import { getBlogsCollection } from "../../db/db";
 import { TBlog } from "TDataBase";
 import { v4 as uuid } from "uuid";
 
 export const blogsRepository = {
-    getBlogs: (): TBlog[] => db.blogs,
-    getBlogById: (id: string): TBlog | undefined => db.blogs.find(blog => blog.id === id),
-    createBlog: (body: Record<string, string>): TBlog => {
+    getBlogs: async (): Promise<TBlog[]> => {
+        const blogsCollection = getBlogsCollection();
+
+        return await blogsCollection.find({}).toArray();
+    },
+    getBlogById: async (id: string): Promise<TBlog | null> => {
+        const blogsCollection = getBlogsCollection();
+
+        return await blogsCollection.findOne({ id });
+    },
+    createBlog: async (body: Record<string, string>): Promise<TBlog> => {
         const newBlog: TBlog = {
             ...body,
             id: uuid(),
             name: body.name.trim(),
             description: body.description.trim(),
-            websiteUrl: body.websiteUrl.trim(), 
+            websiteUrl: body.websiteUrl.trim(),
+            createdAt: new Date().toISOString(),
+            isMembership: false,
         };
 
-        db.blogs = [...db.blogs, newBlog];
+        const blogsCollection = getBlogsCollection();
+        await blogsCollection.insertOne(newBlog);
 
         return newBlog;
     },
-    updateBlogById: (id: string, body: Record<string, string>): TBlog | null => {
-        const { blogs } = db;
-        const blogIndex = blogs.findIndex(blog => blog.id === id);
+    updateBlogById: async (id: string, body: Record<string, string>): Promise<TBlog | null> => {
+        const blogsCollection = getBlogsCollection();
 
-        if(blogIndex !== -1) {
-            blogs[blogIndex] = {
-                ...blogs[blogIndex],
-                ...body,
-            };
+        const updatedBlog = await blogsCollection.findOneAndUpdate(
+            { id },
+            { $set: { ...body } },
+            { returnDocument: 'after' },
+        );
 
-            return blogs[blogIndex];
-        } else { 
-            return null;
-        }
+        return updatedBlog;
     },
-    deleteVideoById: (id: string): string | null => {
-        const { blogs } = db;
-        const blogIndex = blogs.findIndex(blog => blog.id === id);
+    deleteVideoById: async (id: string): Promise<string | null> => {
+        const blogsCollection = getBlogsCollection();
 
-        if(blogIndex !== -1) {
-            blogs.splice(blogIndex, 1);
+        const deletedBlog = await blogsCollection.deleteOne({ id });
 
-            return id;
-        } else { 
-            return null;
+        if (deletedBlog.deletedCount < 1) {
+            return null
         }
+
+        return id;
     }
 }
