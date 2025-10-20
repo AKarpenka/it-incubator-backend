@@ -35,8 +35,11 @@ describe('/blogs', () => {
         expect(res.body.description).toEqual(newBlog.description);
         expect(res.body.websiteUrl).toEqual(newBlog.websiteUrl);
         expect(typeof res.body.id).toEqual('string');
-
-        expect(res.body).toEqual(mockDB.blogs[0]);
+        expect(res.body.createdAt).toBeDefined();
+        expect(res.body.isMembership).toBe(false);
+        
+        // Проверяем, что _id отсутствует в ответе API
+        expect(res.body._id).toBeUndefined();
     });
 
     it('createBlog: shouldn\'t create 401', async () => {
@@ -97,7 +100,10 @@ describe('/blogs', () => {
             .expect(200);
 
         expect(res.body.length).toEqual(1);
-        expect(res.body[0]).toEqual(mockDB.blogs[0]);
+        expect(res.body[0].name).toEqual(dataset1.blogs[0].name);
+        expect(res.body[0].description).toEqual(dataset1.blogs[0].description);
+        expect(res.body[0].websiteUrl).toEqual(dataset1.blogs[0].websiteUrl);
+        expect(res.body[0]._id).toBeUndefined();
     });
 
     it('getBlog: shouldn\'t find', async () => {
@@ -115,7 +121,11 @@ describe('/blogs', () => {
             .get(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
             .expect(200);
 
-        expect(res.body).toEqual(mockDB.blogs[0]);
+        expect(res.body.id).toEqual(dataset1.blogs[0].id);
+        expect(res.body.name).toEqual(dataset1.blogs[0].name);
+        expect(res.body.description).toEqual(dataset1.blogs[0].description);
+        expect(res.body.websiteUrl).toEqual(dataset1.blogs[0].websiteUrl);
+        expect(res.body._id).toBeUndefined();
     });
 
     it('deleteBlog: should del', async () => {
@@ -162,7 +172,10 @@ describe('/blogs', () => {
             .send(blog)
             .expect(204);
 
-        expect(mockDB.blogs[0]).toEqual({ ...mockDB.blogs[0], ...blog });
+        // Проверяем, что блог обновился 
+        expect(mockDB.blogs[0].name).toEqual(blog.name);
+        expect(mockDB.blogs[0].description).toEqual(blog.description);
+        expect(mockDB.blogs[0].websiteUrl).toEqual(blog.websiteUrl);
     });
 
     it('updateBlog: shouldn\'t update (404)', async () => {

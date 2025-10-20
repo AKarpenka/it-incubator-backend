@@ -38,9 +38,10 @@ describe('/posts', () => {
         expect(res.body.blogId).toEqual(newPost.blogId);
         expect(res.body.blogName).toEqual(dataset1.blogs[0].name);
         expect(typeof res.body.id).toEqual('string');
-
-        // проверка на состояние моковой базы
-        expect(res.body).toEqual(mockDB.posts[0]);
+        expect(res.body.createdAt).toBeDefined();
+        
+        // Проверяем, что _id отсутствует в ответе API
+        expect(res.body._id).toBeUndefined();
     });
 
     it('createPost: shouldn\'t create 401', async () => {
@@ -104,7 +105,11 @@ describe('/posts', () => {
             .expect(200);
 
         expect(res.body.length).toEqual(1);
-        expect(res.body[0]).toEqual(mockDB.posts[0]);
+        expect(res.body[0].title).toEqual(dataset2.posts[0].title);
+        expect(res.body[0].shortDescription).toEqual(dataset2.posts[0].shortDescription);
+        expect(res.body[0].content).toEqual(dataset2.posts[0].content);
+        expect(res.body[0].blogId).toEqual(dataset2.posts[0].blogId);
+        expect(res.body[0]._id).toBeUndefined();
     });
 
     it('getPost: shouldn\'t find', async () => {
@@ -122,7 +127,12 @@ describe('/posts', () => {
             .get(SETTINGS.PATH.POSTS + '/' + dataset2.posts[0].id)
             .expect(200);
 
-        expect(res.body).toEqual(mockDB.posts[0]);
+        expect(res.body.id).toEqual(dataset2.posts[0].id);
+        expect(res.body.title).toEqual(dataset2.posts[0].title);
+        expect(res.body.shortDescription).toEqual(dataset2.posts[0].shortDescription);
+        expect(res.body.content).toEqual(dataset2.posts[0].content);
+        expect(res.body.blogId).toEqual(dataset2.posts[0].blogId);
+        expect(res.body._id).toBeUndefined();
     });
 
     it('deletePost: should del', async () => {
@@ -171,7 +181,11 @@ describe('/posts', () => {
             .send(post)
             .expect(204);
 
-        expect(mockDB.posts[0]).toEqual({ ...mockDB.posts[0], ...post });
+        expect(mockDB.posts[0].title).toEqual(post.title);
+        expect(mockDB.posts[0].shortDescription).toEqual(post.shortDescription);
+        expect(mockDB.posts[0].content).toEqual(post.content);
+        expect(mockDB.posts[0].blogId).toEqual(post.blogId);
+        expect(mockDB.posts[0].blogName).toEqual(post.blogName);
     });
 
     it('putPost: shouldn\'t update (404)', async () => {
