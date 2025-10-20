@@ -1,18 +1,19 @@
-import { getBlogsCollection, getPostsCollection } from "../../db/db";
+import { getPostsCollection } from "../../db/db";
 import { TPost } from "TDataBase";
 import { v4 as uuid } from "uuid";
 import { blogsRepository } from "../blogs/blogs-repository";
+import { WithId } from "mongodb";
 
 export const postsRepository = {
     getPosts: async (): Promise<TPost[]> => {
         const postsCollection = getPostsCollection();
 
-        return await postsCollection.find({}).toArray();
+        return await postsCollection.find({}, { projection: { _id: 0 } }).toArray();
     },
     getPostById: async (id: string): Promise<TPost | null> => {
         const postsCollection = getPostsCollection();
 
-        return await postsCollection.findOne({ id });
+        return await postsCollection.findOne({ id }, { projection: { _id: 0 } });
     },
     createPost: async (body: Record<string, string>): Promise<TPost | null> => {
         const blog = await blogsRepository.getBlogById(body.blogId);
@@ -35,7 +36,9 @@ export const postsRepository = {
         const postsCollection = getPostsCollection();
         await postsCollection.insertOne(newPost);
 
-        return newPost;
+        const { _id, ...postWithoutMongoId } = newPost as WithId<TPost>;
+        
+        return postWithoutMongoId;
     },
     updatePostById: async (id: string, body: Record<string, string>): Promise<TPost | null> => {
         const postsCollection = getPostsCollection();
@@ -43,7 +46,7 @@ export const postsRepository = {
         const updatedBlog = await postsCollection.findOneAndUpdate(
             { id },
             { $set: { ...body } },
-            { returnDocument: 'after' },
+            { returnDocument: 'after', projection: { _id: 0 } },
         );
 
         return updatedBlog;
