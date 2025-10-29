@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { SETTINGS } from "../../settings";
+import { SETTINGS } from "../../core/settings/settings";
+import { HttpStatus } from "../../core/types/httpStatuses";
 
 const TYPE_OF_AUTH = `Basic`;
 
@@ -19,7 +20,7 @@ export const authorizationMiddleware = (
 
     if (!auth || auth.slice(0, 6) !== `${TYPE_OF_AUTH} `) {
         res
-            .status(401)
+            .status(HttpStatus.Unauthorized)
             .json({})
 
         return;
@@ -29,7 +30,7 @@ export const authorizationMiddleware = (
 
     if (auth.slice(6) !== codedAuth) {
         res
-            .status(401)
+            .status(HttpStatus.Unauthorized)
             .json({})
 
         return;

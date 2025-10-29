@@ -1,7 +1,8 @@
 import 'jest';
 import * as db from "../src/db/db";
-import { TBlog, TPost } from "../src/types/TDataBase";
 import { mockDB } from "./mocks";
+import { TBlog } from '../src/modules/blogs/types/blog';
+import { TPost } from '../src/modules/posts/types/post';
 
 const fakeCollection = <T extends { id: string }>(data: T[]) => ({
   find: (query: Partial<T>, options?: { projection?: any }) => ({

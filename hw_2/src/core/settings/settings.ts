@@ -4,9 +4,9 @@ config();
 export const SETTINGS = {
     PORT: process.env.PORT || 3003,
     PATH: {
-        BLOGS: '/blogs',
-        POSTS: '/posts',
-        TESTING: '/testing',
+        BLOGS: '/api/blogs',
+        POSTS: '/api/posts',
+        TESTING: '/api/testing',
     },
     ADMIN: process.env.ADMIN || 'admin:qwerty' || 'admin\qwerty',
     MONGO_URL: process.env.MONGO_URL,

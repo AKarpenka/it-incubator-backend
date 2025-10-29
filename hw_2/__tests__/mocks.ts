@@ -1,4 +1,10 @@
-import { TBlog, TDataBase, TPost } from '../src/types/TDataBase';
+import { TBlog } from "../src/modules/blogs/types/blog";
+import { TPost } from "../src/modules/posts/types/post";
+
+export type TDataBase = {
+    blogs: TBlog[],
+    posts: TPost[],
+}
 
 export const mockDB: TDataBase = {
     blogs: [],
