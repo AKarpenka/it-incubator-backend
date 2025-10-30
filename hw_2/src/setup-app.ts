@@ -4,7 +4,7 @@ import express, { Express } from 'express';
 import cors from 'cors';
 import { setupSwagger } from './core/swagger/setup-swagger';
 
-export const setupApp = async (app: Express) => {
+export const setupApp = (app: Express) => {
   app.use(express.json());
 
   app.use(cors());

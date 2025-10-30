@@ -13,28 +13,7 @@ npm run dev:watch - npm run watch + npm run dev - основная очка вх
 Express.js - get, post, put, delete методы
 MongoDB - cloud. 
 *Endpoints:*
-get, post /posts/
-get, put, delete /posts/:id
-get, post /blogs/
-get, put, delete /blogs/:id
-
-
-//TODO:
-переделать структуру проекта - posts, тесты прогнать 
-
-посмотреть новые видосы 
-eventLoop
-jsonapi почитать обженародную доку 
-настроить swagger - api
-
-
-dto - то, что приходит из клиента - входные параметры, либо передача между сервисами 
-обычные типы - исходящий, который уходит на клиент. Они могут отличаться 
-
-курсор - с монги возвращается из коллекции курсор на текущий объект, если сделать .toArray(), то возращаются все объекты уже 
-если просто сделать .collection.find() вернет миллион записей сразу и может по памяти упасть приложение 
-курсор возвращает ссылку - id - на следующий элемент коллекции
-
-express.json() - зачем эо? 
-
-id -> _id
+get, post /api/posts/
+get, put, delete /api/posts/:id
+get, post /api/blogs/
+get, put, delete /api/blogs/:id

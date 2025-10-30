@@ -1,8 +1,7 @@
 import 'jest';
 import * as db from "../src/db/db";
-import { mockDB } from "./mocks";
-import { TBlog } from '../src/modules/blogs/types/blog';
-import { TPost } from '../src/modules/posts/types/post';
+import { mockDB, TDataBase } from "./mocks";
+import { ObjectId } from 'mongodb';
 
 const fakeCollection = <T extends { id: string }>(data: T[]) => ({
   find: (query: Partial<T>, options?: { projection?: any }) => ({
@@ -19,11 +18,23 @@ const fakeCollection = <T extends { id: string }>(data: T[]) => ({
         });
       }
       
-      return results;
+      return results.map(item => ({ ...item, _id: new ObjectId((item as any).id) }));
     },
   }),
-  findOne: async (query: Partial<T>, options?: { projection?: any }) => {
-    const result = data.find((d) => d.id === query.id);
+  findOne: async (query: any, options?: { projection?: any }) => {
+    let result;
+    
+    if (query._id) {
+      // Если передан ObjectId, преобразуем в строку для поиска по id в моках
+      const idString = typeof query._id === 'object' && query._id.toString 
+        ? query._id.toString() 
+        : String(query._id);
+      result = data.find((d) => d.id === idString);
+    } else if (query.id) {
+      result = data.find((d) => d.id === query.id);
+    } else {
+      result = null;
+    }
     
     if (!result) return null;
     
@@ -33,18 +44,41 @@ const fakeCollection = <T extends { id: string }>(data: T[]) => ({
       return rest as T;
     }
     
-    return result;
+    return { ...result, _id: new ObjectId(result.id) } as any;
   },
   insertOne: async (doc: T) => {
     // Эмулируем поведение MongoDB - мутируем документ, добавляя _id
-    // (как делает настоящая MongoDB), но в массив data он попадет через destructuring в repository
     const docWithId = doc as any;
-    docWithId._id = `generated-mongo-id-${Date.now()}-${Math.random()}`;
+    
+    if (!docWithId.createdAt) {
+      docWithId.createdAt = new Date().toISOString();
+    }
+    
+    if (docWithId.name !== undefined && docWithId.isMembership === undefined) {
+      docWithId.isMembership = false;
+    }
+    
+    if (!docWithId.id) {
+      const newObjectId = new ObjectId();
+      docWithId.id = newObjectId.toString();
+      docWithId._id = newObjectId;
+    } else {
+      docWithId._id = new ObjectId(docWithId.id);
+    }
     data.push(doc);
-    return { insertedId: doc.id };
+    return { insertedId: docWithId._id };
   },
-  updateOne: async (filter: Partial<T>, update: any) => {
-    const idx = data.findIndex((d) => d.id === filter.id);
+  updateOne: async (filter: any, update: any) => {
+    let idx;
+    
+    if (filter._id) {
+      const idString = typeof filter._id === 'object' && filter._id.toString 
+        ? filter._id.toString() 
+        : String(filter._id);
+      idx = data.findIndex((d) => d.id === idString);
+    } else {
+      idx = data.findIndex((d) => d.id === filter.id);
+    }
 
     if (idx === -1) {
       return { matchedCount: 0, modifiedCount: 0 };
@@ -55,11 +89,20 @@ const fakeCollection = <T extends { id: string }>(data: T[]) => ({
     return { matchedCount: 1, modifiedCount: 1 };
   },
   findOneAndUpdate: async (
-    filter: Partial<T>,
+    filter: any,
     update: any,
     options?: { returnDocument?: 'before' | 'after'; projection?: any }
   ) => {
-    const idx = data.findIndex((d) => d.id === filter.id);
+    let idx;
+    
+    if (filter._id) {
+      const idString = typeof filter._id === 'object' && filter._id.toString 
+        ? filter._id.toString() 
+        : String(filter._id);
+      idx = data.findIndex((d) => d.id === idString);
+    } else {
+      idx = data.findIndex((d) => d.id === filter.id);
+    }
 
     if (idx === -1) {
       return null;
@@ -80,10 +123,19 @@ const fakeCollection = <T extends { id: string }>(data: T[]) => ({
       return rest as T;
     }
     
-    return result;
+    return { ...result, _id: new ObjectId((result as any).id || (data[idx] as any).id) } as any;
   },
-  deleteOne: async (filter: Partial<T>) => {
-    const idx = data.findIndex((d) => d.id === filter.id);
+  deleteOne: async (filter: any) => {
+    let idx;
+    
+    if (filter._id) {
+      const idString = typeof filter._id === 'object' && filter._id.toString 
+        ? filter._id.toString() 
+        : String(filter._id);
+      idx = data.findIndex((d) => d.id === idString);
+    } else {
+      idx = data.findIndex((d) => d.id === filter.id);
+    }
 
     if (idx === -1) {
       return { deletedCount: 0 };
@@ -100,10 +152,13 @@ const fakeCollection = <T extends { id: string }>(data: T[]) => ({
   },
 });
 
-jest.spyOn(db, "getBlogsCollection").mockImplementation(() =>
-  fakeCollection<TBlog>(mockDB.blogs) as any
-);
+// Мокифицируем коллекции напрямую через переопределение свойств
+Object.defineProperty(db, "blogsCollection", {
+  get: () => fakeCollection<TDataBase['blogs'][0]>(mockDB.blogs) as any,
+  configurable: true,
+});
 
-jest.spyOn(db, "getPostsCollection").mockImplementation(() =>
-  fakeCollection<TPost>(mockDB.posts) as any
-);
+Object.defineProperty(db, "postsCollection", {
+  get: () => fakeCollection<TDataBase['posts'][0]>(mockDB.posts) as any,
+  configurable: true,
+});
