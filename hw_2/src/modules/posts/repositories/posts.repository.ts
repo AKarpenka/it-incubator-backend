@@ -1,69 +1,58 @@
-import { ObjectId, WithId } from "mongodb";
-import { blogsRepository } from "../../blogs/repositories/blogs.repository";
+import { DeleteResult, ObjectId, WithId } from "mongodb";
 import { postsCollection } from "../../../db/db";
-import { TPost } from "../types/post";
-import { TPostDTO } from "../dto/posts-input.dto";
+import { TPost, TPostQueryInput } from "../types/post";
+import { TPostDTO } from "../application/dto/posts-input.dto";
 
 export const postsRepository = {
-    getPosts: async (): Promise<WithId<TPost>[]> => {
-        return await postsCollection.find().toArray();
+    getPosts: async (
+        queryDto: TPostQueryInput,
+        blogId?: string,
+    ): Promise<{ items: WithId<TPost>[]; totalCount: number }> => {
+        const {
+            pageNumber,
+            pageSize,
+            sortBy,
+            sortDirection,
+        } = queryDto;
+
+        const skip = (pageNumber - 1) * pageSize;
+        const filter: any = {};
+
+        if(blogId) {
+            filter.blogId = blogId;
+        }
+
+        const items = await postsCollection
+            .find(filter)
+            .sort({ [sortBy]: sortDirection })
+            .skip(skip)
+            .limit(pageSize)
+            .toArray();
+
+        const totalCount = await postsCollection.countDocuments(filter);
+
+        return { items, totalCount };
     },
 
     getPostById: async (id: string): Promise<WithId<TPost> | null> => {
-        if (!ObjectId.isValid(id)) {
-            return Promise.resolve(null);
-        }
-        
         return await postsCollection.findOne({ _id: new ObjectId(id) });
     },
 
-    createPost: async (post: TPostDTO): Promise<WithId<TPost> | null> => {
-        const blog = await blogsRepository.getBlogById(post.blogId);
-
-        if(!blog) {
-            return null;
-        }
-
-        const newPost: TPost = {
-            ...post,
-            title: post.title.trim(),
-            shortDescription: post.shortDescription.trim(),
-            content: post.content.trim(),
-            blogId: post.blogId.trim(),
-            blogName: blog?.name,
-            createdAt: new Date().toISOString(),
-        };
-
+    createPost: async (newPost: TPost): Promise<WithId<TPost> | null> => {
         const postWithoutMongoId = await postsCollection.insertOne(newPost);
 
         return {...newPost, _id: postWithoutMongoId.insertedId};
     },
 
     updatePostById: async (id: string, post: TPostDTO): Promise<WithId<TPost> | null> => {
-        if (!ObjectId.isValid(id)) {
-            return null;
-        };
-
-        const updatedBlog = await postsCollection.findOneAndUpdate(
+        return await postsCollection.findOneAndUpdate(
             { _id: new ObjectId(id) },
             { $set: { ...post } },
             { returnDocument: 'after' },
         );
-
-        return updatedBlog;
     },
 
-    deletePostById: async (id: string): Promise<string | null> => {
-        if (!ObjectId.isValid(id)) {
-            return null;
-        };
-
-        const deletedBlog = await postsCollection.deleteOne({ _id: new ObjectId(id) });
-
-        if (deletedBlog.deletedCount < 1) {
-            return null
-        }
-
-        return id;
+    deletePostById: async (id: string): Promise<DeleteResult> => {
+        return await postsCollection.deleteOne({ _id: new ObjectId(id) });
     }
 }

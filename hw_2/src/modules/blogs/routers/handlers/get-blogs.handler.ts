@@ -1,13 +1,21 @@
 import { Request, Response } from 'express';
-import { blogsRepository } from "../../repositories/blogs.repository";
 import { HttpStatus } from '../../../../core/types/httpStatuses';
-import { mapToBlogsViewModel } from '../mappers/map-to-blogs-view-model.util';
+import { blogsService } from '../../application/blogs.service';
+import { setDefaultSortAndPaginationIfNotExist } from '../../../../core/helpers/set-default-sort-and-pagination';
+import { TBlogQueryInput } from '../../types/blog';
+import { mapToBlogsViewModelPaginated } from '../mappers/map-to-blogs-view-model-paginated.util';
 
-export async function getBlogsHandler(req: Request, res: Response) {
+export async function getBlogsHandler(req: Request<{}, {}, {}, Partial<TBlogQueryInput>>, res: Response) {
     try {
-        const blogs = await blogsRepository.getBlogs();
+        const queryInput = setDefaultSortAndPaginationIfNotExist(req.query);
+
+        const { items, totalCount } = await blogsService.getBlogs(queryInput);
             
-        const blogsViewModel = blogs.map(mapToBlogsViewModel);
+        const blogsViewModel = mapToBlogsViewModelPaginated(items, {
+            pageNumber: queryInput.pageNumber,
+            pageSize: queryInput.pageSize,
+            totalCount,
+        });
 
         res.send(blogsViewModel);
     } catch (e: unknown) {

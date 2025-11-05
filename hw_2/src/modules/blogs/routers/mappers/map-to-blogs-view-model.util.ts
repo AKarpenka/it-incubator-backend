@@ -2,6 +2,7 @@ import { WithId } from 'mongodb';
 import { TBlog } from '../../types/blog';
 import { TBlogViewModel } from '../../types/blog-view-model';
 
+//ToDo для этого можно сделать query-repo
 export function mapToBlogsViewModel(blog: WithId<TBlog>): TBlogViewModel {
   return {
       id: blog._id.toString(),

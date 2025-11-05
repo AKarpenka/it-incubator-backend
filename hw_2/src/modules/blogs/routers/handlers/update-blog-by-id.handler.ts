@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import { blogsRepository } from '../../repositories/blogs.repository';
-import { TBlogDTO } from '../../dto/blogs-input.dto';
+import { TBlogDTO } from '../../application/dto/blogs-input.dto';
 import { HttpStatus } from '../../../../core/types/httpStatuses';
+import { blogsService } from '../../application/blogs.service';
 
 export async function updateBlogByIdHandler(req: Request<{ id: string }, {}, TBlogDTO>, res: Response) {
     try {
-        const updatedBlog = await blogsRepository.updateBlogById(req.params.id, req.body);
+        const updatedBlog = await blogsService.updateBlogById(req.params.id, req.body);
 
         if(updatedBlog === null) {
             res

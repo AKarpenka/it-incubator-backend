@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
-import { postsRepository } from "../../repositories/posts.repository";
 import { HttpStatus } from '../../../../core/types/httpStatuses';
+import { postsService } from '../../application/posts.service';
 
 export async function deletePostByIdHandler(req: Request, res: Response) {
     try {
-        const deletedPostId = await postsRepository.deletePostById(req.params.id);
+        //todo тут вынести в сервис 
+        const deletedPostId = await postsService.deletePostById(req.params.id);
 
         if(deletedPostId === null) {
             res

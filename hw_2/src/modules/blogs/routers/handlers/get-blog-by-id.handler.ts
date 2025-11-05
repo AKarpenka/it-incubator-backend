@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import { blogsRepository } from "../../repositories/blogs.repository";
 import { HttpStatus } from '../../../../core/types/httpStatuses';
 import { mapToBlogsViewModel } from '../mappers/map-to-blogs-view-model.util';
+import { blogsService } from '../../application/blogs.service';
 
 export async function getBlogsByIdHandler(req: Request, res: Response) {
     try {
-        const blog = await blogsRepository.getBlogById(req.params.id);
+        const blog = await blogsService.getBlogById(req.params.id);
 
         if(!blog) {
             res

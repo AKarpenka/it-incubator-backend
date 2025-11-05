@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
-import { blogsRepository } from "../../repositories/blogs.repository";
-import { TBlogDTO } from '../../dto/blogs-input.dto';
+import { TBlogDTO } from '../../application/dto/blogs-input.dto';
 import { HttpStatus } from '../../../../core/types/httpStatuses';
 import { mapToBlogsViewModel } from '../mappers/map-to-blogs-view-model.util';
+import { blogsService } from '../../application/blogs.service';
 
 export async function createBlogHandler(req: Request<{}, {}, TBlogDTO>, res: Response) {
     try {
-        const newBlog = await blogsRepository.createBlog(req.body);
+        const newBlog = await blogsService.createBlog(req.body);
 
         const newBlogViewModel = mapToBlogsViewModel(newBlog);
 

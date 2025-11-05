@@ -1,13 +1,21 @@
 import { Request, Response } from 'express';
-import { postsRepository } from "../../repositories/posts.repository";
 import { HttpStatus } from '../../../../core/types/httpStatuses';
-import { mapToPostsViewModel } from '../mapper/map-to-posts-view-model.utils';
+import { postsService } from '../../application/posts.service';
+import { TPostQueryInput } from '../../types/post';
+import { setDefaultSortAndPaginationIfNotExist } from '../../../../core/helpers/set-default-sort-and-pagination';
+import { mapToPostsViewModelPaginated } from '../mapper/map-to-posts-view-model-paginated.utils';
 
-export async function getPostsHandler(req: Request, res: Response) {
+export async function getPostsHandler(req: Request<{}, {}, {}, Partial<TPostQueryInput>>, res: Response) {
     try {
-        const posts = await postsRepository.getPosts();
-        
-        const postsViewModel = posts.map(mapToPostsViewModel);
+        const queryInput = setDefaultSortAndPaginationIfNotExist(req.query);
+
+        const { items, totalCount } = await postsService.getPosts(queryInput);
+
+        const postsViewModel = mapToPostsViewModelPaginated(items, {
+            pageNumber: queryInput.pageNumber,
+            pageSize: queryInput.pageSize,
+            totalCount,
+        });
 
         res
             .status(HttpStatus.Ok)

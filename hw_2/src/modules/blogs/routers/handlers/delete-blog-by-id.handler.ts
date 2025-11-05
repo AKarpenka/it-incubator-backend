@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
-import { blogsRepository } from '../../repositories/blogs.repository';
 import { HttpStatus } from '../../../../core/types/httpStatuses';
+import { blogsService } from '../../application/blogs.service';
 
 export async function deleteBlogByIdHandler(req: Request, res: Response) {
     try {
-        const deletedBlogId = await blogsRepository.deleteBlogById(req.params.id);
+        const deletedBlogId = await blogsService.deleteBlogById(req.params.id);
 
         if(deletedBlogId === null) {
             res

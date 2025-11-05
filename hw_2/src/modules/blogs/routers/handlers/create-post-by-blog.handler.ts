@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
+import { TPostDTO } from '../../../posts/application/dto/posts-input.dto';
 import { HttpStatus } from '../../../../core/types/httpStatuses';
-import { mapToPostsViewModel } from '../mapper/map-to-posts-view-model.utils';
-import { TPostDTO } from '../../application/dto/posts-input.dto';
-import { postsService } from '../../application/posts.service';
+import { postsService } from '../../../posts/application/posts.service';
+import { mapToPostsViewModel } from '../../../posts/routers/mapper/map-to-posts-view-model.utils';
 
-export async function createPostHandler(req: Request<{}, {}, TPostDTO>, res: Response) {
+export async function createPostByBlogHandler(req: Request<{ id: string }, {}, TPostDTO>, res: Response) {
     try {
-        const newPost = await postsService.createPost(req.body);
+        const newPost = await postsService.createPost(req.body, req.params.id);
 
         if(!newPost) {
             res
@@ -16,6 +16,7 @@ export async function createPostHandler(req: Request<{}, {}, TPostDTO>, res: Res
             return;
         }
 
+        
         const postViewModel = mapToPostsViewModel(newPost);
 
         res

@@ -4,12 +4,19 @@ import { errorsResultMiddleware } from "../../../middlewares/validation/errors-r
 import { authorizationMiddleware } from "../../../middlewares/auth/basic-auth-middleware";
 import { postsValidatorMiddleware } from './middlewares/posts-validators.middleware';
 import { createPostHandler, deletePostByIdHandler, getPostByIdHandler, getPostsHandler, updatePostByIdHandler } from './handlers';
+import { paginationAndSortingValidation } from '../../../middlewares/validation/pagination-sorting-validation.middleware';
+import { PostsSortBy } from '../constants';
 
 export const postsRouter = Router();
 
 postsRouter
-    .get('/', getPostsHandler)
     .get('/:id', idValidation, errorsResultMiddleware, getPostByIdHandler)
+    .get(
+        '/', 
+        paginationAndSortingValidation(PostsSortBy),
+        errorsResultMiddleware,
+        getPostsHandler
+    )
 
     .delete('/:id', 
         authorizationMiddleware, 

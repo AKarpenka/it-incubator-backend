@@ -1,18 +1,41 @@
-import { ObjectId, WithId } from "mongodb";
+import { DeleteResult, ObjectId, WithId } from "mongodb";
 import { blogsCollection } from "../../../db/db";
-import { TBlog } from "../types/blog";
-import { TBlogDTO } from "../dto/blogs-input.dto";
+import { TBlog, TBlogQueryInput } from "../types/blog";
+import { TBlogDTO } from "../application/dto/blogs-input.dto";
 
 export const blogsRepository = {
-    getBlogs: async (): Promise<WithId<TBlog>[]> => {
-        return await blogsCollection.find().toArray();
+    getBlogs: async (queryDto: TBlogQueryInput): Promise<{ items: WithId<TBlog>[]; totalCount: number }> => {
+        const {
+            pageNumber,
+            pageSize,
+            sortBy,
+            sortDirection,
+            searchNameTerm,
+        } = queryDto;
+
+        const skip = (pageNumber - 1) * pageSize;
+        const filter: any = {};
+
+        if (searchNameTerm) {
+            filter.name = { $regex: searchNameTerm, $options: 'i' };
+        }
+
+        const items = await blogsCollection
+            .find(filter)
+            .sort({ [sortBy]: sortDirection })
+            .skip(skip)
+            .limit(pageSize)
+            .toArray();
+
+        const totalCount = await blogsCollection.countDocuments(filter);
+
+        return {
+            items,
+            totalCount,
+        }
     },
 
     getBlogById: async (id: string): Promise<WithId<TBlog> | null> => {
-        if (!ObjectId.isValid(id)) {
-            return Promise.resolve(null);
-        }
-        
         return await blogsCollection.findOne({ _id: new ObjectId(id) });
     },
 
@@ -23,10 +46,6 @@ export const blogsRepository = {
     },
 
     updateBlogById: async (id: string, blog: TBlogDTO): Promise<WithId<TBlog> | null> => {
-        if (!ObjectId.isValid(id)) {
-            return null;
-        };
-        
         const updatedBlog = await blogsCollection.findOneAndUpdate(
             { _id: new ObjectId(id) },
             { $set: { ...blog } },
@@ -38,17 +57,7 @@ export const blogsRepository = {
         return updatedBlog;
     },
 
-    deleteBlogById: async (id: string): Promise<string | null> => {
-        if (!ObjectId.isValid(id)) {
-            return null;
-        };
-
-        const deletedBlog = await blogsCollection.deleteOne({ _id: new ObjectId(id) });
-
-        if (deletedBlog.deletedCount < 1) {
-            return null;
-        };
-
-        return id;
+    deleteBlogById: async (id: string): Promise<DeleteResult> => {
+        return await blogsCollection.deleteOne({ _id: new ObjectId(id) });
     }
 }

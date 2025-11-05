@@ -1,3 +1,6 @@
+import { TPaginationAndSorting } from "../../../core/types/sortingPagination";
+import { PostsSortBy } from "../constants";
+
 export type TPost = {
     title: string,
     shortDescription: string,
@@ -6,3 +9,5 @@ export type TPost = {
     blogName: string,
     createdAt?: string;
 }
+
+export type TPostQueryInput = TPaginationAndSorting<PostsSortBy>;

@@ -7,3 +7,4 @@ export function generateAdminAuthToken(): string {
   return `Basic ${codedAuth}`;
 }
 
+

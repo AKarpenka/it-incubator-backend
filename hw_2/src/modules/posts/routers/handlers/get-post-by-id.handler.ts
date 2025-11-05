@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import { postsRepository } from '../../repositories/posts.repository';
 import { HttpStatus } from '../../../../core/types/httpStatuses';
 import { mapToPostsViewModel } from '../mapper/map-to-posts-view-model.utils';
+import { postsService } from '../../application/posts.service';
 
 export async function getPostByIdHandler(req: Request, res: Response) {
-    try{
-        const post = await postsRepository.getPostById(req.params.id);
+    try {
+        const post = await postsService.getPostById(req.params.id);
 
         if(!post) {
             res
