@@ -13,7 +13,8 @@ npm run dev:watch - npm run watch + npm run dev - основная очка вх
 Express.js - get, post, put, delete методы
 MongoDB - cloud. 
 *Endpoints:*
-get, post /posts/
-get, put, delete /posts/:id
-get, post /blogs/
-get, put, delete /blogs/:id
+get, post: /api/posts/
+get, put, delete: /api/posts/:id
+get, post: /api/blogs/
+get, put, delete: /api/blogs/:id
+get, post: api/blogs/:id/posts

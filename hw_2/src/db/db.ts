@@ -1,53 +1,39 @@
-import { Collection, MongoClient } from "mongodb";
-import { TBlog, TPost } from "../types/TDataBase";
-import { SETTINGS } from '../settings';
+import { Collection, Db, MongoClient } from "mongodb";
+import { SETTINGS } from '../core/settings/settings';
+import { TBlog } from "../modules/blogs/types/blog";
+import { TPost } from "../modules/posts/types/post";
 
 const MONGO_URL = SETTINGS.MONGO_URL;
 const MONGODB_NAME = SETTINGS.MONGODB_NAME;
+const BLOGS_COLLECTION_NAME = 'blogs';
+const POSTS_COLLECTION_NAME = 'posts';
 
-if(!MONGO_URL) {
-    console.error('MONGO_URL doesnt found');
-
-    throw new Error('MONGO_URL doesnt found');
-}
-
-if(!MONGODB_NAME) {
-    console.error('MONGODB_NAME doesnt found');
-
-    throw new Error('MONGODB_NAME doesnt found');
-}
-
-const client = new MongoClient(MONGO_URL);
-
-let blogsCollection: Collection<TBlog>;
-let postsCollection: Collection<TPost>;
+export let client: MongoClient;
+export let blogsCollection: Collection<TBlog>;
+export let postsCollection: Collection<TPost>;
 
 export const runDB = async () => {
+    if(!MONGO_URL) {
+        console.error('MONGO_URL doesnt found');
+
+        throw new Error('MONGO_URL doesnt found');
+    }
+
+    client = new MongoClient(MONGO_URL);
+
+    const db: Db = client.db(MONGODB_NAME);
+
+    blogsCollection = db.collection<TBlog>(BLOGS_COLLECTION_NAME);
+    postsCollection = db.collection<TPost>(POSTS_COLLECTION_NAME);
+
     try {
         await client.connect();
-        const database = client.db(MONGODB_NAME);
-        
-        blogsCollection = database.collection<TBlog>('blogs');
-        postsCollection = database.collection<TPost>('posts');
-        
-        await database.command({ ping: 1 });
+        await db.command({ ping: 1 });
 
-        console.log('Connected successfully to mongo server');
+        console.log('✅ Connected to the database');
     } catch (error) {
-        console.error('Connection error:', error);
-
         await client.close();
+
+        throw new Error(`❌ Database not connected: ${error}`);
     }
 }
-
-
-// Геттеры для коллекций (с проверкой инициализации)
-export const getBlogsCollection = (): Collection<TBlog> => {
-    if (!blogsCollection) throw new Error('Blogs collection not initialized. Call connectToDB() first.');
-    return blogsCollection;
-};
-
-export const getPostsCollection = (): Collection<TPost> => {
-    if (!postsCollection) throw new Error('Posts collection not initialized. Call connectToDB() first.');
-    return postsCollection;
-};

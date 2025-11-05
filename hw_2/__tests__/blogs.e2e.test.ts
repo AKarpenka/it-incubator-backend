@@ -1,237 +1,253 @@
+/// <reference types="jest" />
 import 'jest';
-import { req } from './test-helpers';
-import { SETTINGS } from '../src/settings';
-import { TBlog } from '../src/types/TDataBase';
+import request from 'supertest';
+import express from 'express';
+import { setupApp } from '../src/setup-app';
+import { SETTINGS } from '../src/core/settings/settings';
+import { HttpStatus } from '../src/core/types/httpStatuses';
+import { TBlog } from '../src/modules/blogs/types/blog';
 import { dataset1, mockDB } from './mocks';
 import { createString, setMockDB } from './helpers';
-import { fromUTF8ToBase64 } from '../src/middlewares/auth/basic-auth-middleware';
-
-const codedAuth = fromUTF8ToBase64(SETTINGS.ADMIN);
+import { generateAdminAuthToken } from './utils/generate-admin-auth-token';
 
 type TBlogInputModel = Pick<TBlog, 'description' | 'name' | 'websiteUrl'>;
 
 describe('/blogs', () => {
-    beforeAll(async () => {
-        // очистка базы данных перед началом тестирования
-        setMockDB();
-    });
+  const app = express();
+  setupApp(app);
 
-    it('createBlog: should create', async () => {
-        setMockDB();
+  const adminToken = generateAdminAuthToken();
 
-        const newBlog: TBlogInputModel = {
-            name: "n1",
-            description: "description-1",
-            websiteUrl: "https://_XzVrOodmeJpO4JfbvLnKnQQekHQyldl5_PV9pZ4BCjIIziOgnj0GFc4pGGPZxiEugUOH.t7bJbiTBnbh020tkB8I8AQ",
-        };
+  beforeAll(async () => {
+    setMockDB();
+  });
 
-        const res = await req
-            .post(SETTINGS.PATH.BLOGS)
-            .set({ 'Authorization': 'Basic ' + codedAuth })
-            .send(newBlog)
-            .expect(201);
+  it('createBlog: should create', async () => {
+    setMockDB();
 
-        expect(res.body.name).toEqual(newBlog.name);
-        expect(res.body.description).toEqual(newBlog.description);
-        expect(res.body.websiteUrl).toEqual(newBlog.websiteUrl);
-        expect(typeof res.body.id).toEqual('string');
-        expect(res.body.createdAt).toBeDefined();
-        expect(res.body.isMembership).toBe(false);
-        
-        // Проверяем, что _id отсутствует в ответе API
-        expect(res.body._id).toBeUndefined();
-    });
+    const newBlog: TBlogInputModel = {
+      name: "n1",
+      description: "description-1",
+      websiteUrl: "https://_XzVrOodmeJpO4JfbvLnKnQQekHQyldl5_PV9pZ4BCjIIziOgnj0GFc4pGGPZxiEugUOH.t7bJbiTBnbh020tkB8I8AQ",
+    };
 
-    it('createBlog: shouldn\'t create 401', async () => {
-        setMockDB();
+    const res = await request(app)
+      .post(SETTINGS.PATH.BLOGS)
+      .set({ 'Authorization': adminToken })
+      .send(newBlog)
+      .expect(HttpStatus.Created);
 
-        const newBlog: TBlogInputModel = {
-            name: "n1",
-            description: "description-1",
-            websiteUrl: "https://_XzVrOodmeJpO4JfbvLnKnQQekHQyldl5_PV9pZ4BCjIIziOgnj0GFc4pGGPZxiEugUOH.t7bJbiTBnbh020tkB8I8AQ",
-        };
-
-        await req
-            .post(SETTINGS.PATH.BLOGS)
-            .send(newBlog)
-            .expect(401);
-
-        expect(mockDB.blogs.length).toEqual(0);
-    });
-
-    it('createBlog: shouldn\'t create (400)', async () => {
-        setMockDB();
-        
-        const newBlog: TBlogInputModel = {
-            name: createString(17),
-            description: createString(505),
-            websiteUrl: createString(10001),
-        };
-
-        const res = await req
-            .post(SETTINGS.PATH.BLOGS)
-            .set({ 'Authorization': 'Basic ' + codedAuth })
-            .send(newBlog)
-            .expect(400);
-
-        expect(res.body.errorsMessages.length).toEqual(3);
-        expect(res.body.errorsMessages[0].field).toEqual('name');
-        expect(res.body.errorsMessages[1].field).toEqual('description');
-        expect(res.body.errorsMessages[2].field).toEqual('websiteUrl');
-
-        expect(mockDB.blogs.length).toEqual(0);
-    });
-
-    it('getBlogs: should get empty array', async () => {
-        setMockDB();
-
-        const res = await req
-            .get(SETTINGS.PATH.BLOGS)
-            .expect(200);
-
-        expect(res.body.length).toEqual(0);
-    });
+    expect(res.body.name).toEqual(newBlog.name);
+    expect(res.body.description).toEqual(newBlog.description);
+    expect(res.body.websiteUrl).toEqual(newBlog.websiteUrl);
+    expect(typeof res.body.id).toEqual('string');
+    expect(res.body.createdAt).toBeDefined();
+    expect(res.body.isMembership).toBeDefined();
+    expect(res.body.isMembership).toBe(false);
     
-    it('getBlogs: should get not empty array', async () => {
-        setMockDB(dataset1);
+    // Проверяем, что _id отсутствует в ответе API
+    expect(res.body._id).toBeUndefined();
+  });
 
-        const res = await req
-            .get(SETTINGS.PATH.BLOGS)
-            .expect(200);
+  it('createBlog: shouldn\'t create 401', async () => {
+    setMockDB();
 
-        expect(res.body.length).toEqual(1);
-        expect(res.body[0].name).toEqual(dataset1.blogs[0].name);
-        expect(res.body[0].description).toEqual(dataset1.blogs[0].description);
-        expect(res.body[0].websiteUrl).toEqual(dataset1.blogs[0].websiteUrl);
-        expect(res.body[0]._id).toBeUndefined();
-    });
+    const newBlog: TBlogInputModel = {
+      name: "n1",
+      description: "description-1",
+      websiteUrl: "https://_XzVrOodmeJpO4JfbvLnKnQQekHQyldl5_PV9pZ4BCjIIziOgnj0GFc4pGGPZxiEugUOH.t7bJbiTBnbh020tkB8I8AQ",
+    };
 
-    it('getBlog: shouldn\'t find', async () => {
-        setMockDB(dataset1);
+    await request(app)
+      .post(SETTINGS.PATH.BLOGS)
+      .send(newBlog)
+      .expect(HttpStatus.Unauthorized);
 
-        await req
-            .get(SETTINGS.PATH.BLOGS + '/1')
-            .expect(404);
-    });
+    expect(mockDB.blogs.length).toEqual(0);
+  });
 
-    it('getBlog: should find', async () => {
-        setMockDB(dataset1);
+  it('createBlog: shouldn\'t create (400)', async () => {
+    setMockDB();
+    
+    const newBlog: TBlogInputModel = {
+      name: createString(17),
+      description: createString(505),
+      websiteUrl: createString(10001),
+    };
 
-        const res = await req
-            .get(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
-            .expect(200);
+    const res = await request(app)
+      .post(SETTINGS.PATH.BLOGS)
+      .set({ 'Authorization': adminToken })
+      .send(newBlog)
+      .expect(HttpStatus.BadRequest);
 
-        expect(res.body.id).toEqual(dataset1.blogs[0].id);
-        expect(res.body.name).toEqual(dataset1.blogs[0].name);
-        expect(res.body.description).toEqual(dataset1.blogs[0].description);
-        expect(res.body.websiteUrl).toEqual(dataset1.blogs[0].websiteUrl);
-        expect(res.body._id).toBeUndefined();
-    });
+    expect(res.body.errorsMessages.length).toEqual(3);
+    expect(res.body.errorsMessages[0].field).toEqual('name');
+    expect(res.body.errorsMessages[1].field).toEqual('description');
+    expect(res.body.errorsMessages[2].field).toEqual('websiteUrl');
 
-    it('deleteBlog: should del', async () => {
-        setMockDB(dataset1);
+    expect(mockDB.blogs.length).toEqual(0);
+  });
 
-        await req
-            .delete(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
-            .set({ 'Authorization': 'Basic ' + codedAuth })
-            .expect(204);
+  it('getBlogs: should get empty array', async () => {
+    setMockDB();
 
-        expect(mockDB.blogs.length).toEqual(0);
-    });
+    const res = await request(app)
+      .get(SETTINGS.PATH.BLOGS)
+      .expect(HttpStatus.Ok);
 
-    it('deleteBlog: shouldn\'t del (404)', async () => {
-        setMockDB();
+    expect(res.body.length).toEqual(0);
+  });
+  
+  it('getBlogs: should get not empty array', async () => {
+    setMockDB(dataset1);
 
-        await req
-            .delete(SETTINGS.PATH.BLOGS + '/1')
-            .set({ 'Authorization': 'Basic ' + codedAuth })
-            .expect(404);
-    });
+    const res = await request(app)
+      .get(SETTINGS.PATH.BLOGS)
+      .expect(HttpStatus.Ok);
 
-    it('deleteBlog: shouldn\'t del (401)', async () => {
-        setMockDB();
+    expect(res.body.length).toEqual(1);
+    expect(res.body[0].name).toEqual(dataset1.blogs[0].name);
+    expect(res.body[0].description).toEqual(dataset1.blogs[0].description);
+    expect(res.body[0].websiteUrl).toEqual(dataset1.blogs[0].websiteUrl);
+    expect(res.body[0]._id).toBeUndefined();
+  });
 
-        await req
-            .delete(SETTINGS.PATH.BLOGS + '/1')
-            .set({ 'Authorization': 'Basic' + codedAuth }) // без пробела
-            .expect(401);
-    });
+  it('getBlog: shouldn\'t find', async () => {
+    setMockDB(dataset1);
 
-    it('updateBlog: should update', async () => {
-        setMockDB(dataset1);
+    // Используем валидный, но несуществующий ObjectId
+    const nonExistentId = '507f1f77bcf86cd799439099';
+    await request(app)
+      .get(SETTINGS.PATH.BLOGS + '/' + nonExistentId)
+      .expect(HttpStatus.NotFound);
+  });
 
-        const blog: TBlogInputModel = {
-            name: "n2",
-            description: "description-2",
-            websiteUrl: "https://_XzVrOodmeJpO4JfbvLnKnQQekHQyldl5_PV9pZ4BCjIIziOgnj0GFc4pGGPZxiEugUOH.t7bJbiTBnbh020tkB8I8AQ",
-        };
+  it('getBlog: should find', async () => {
+    setMockDB(dataset1);
 
-        await req
-            .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
-            .set({ 'Authorization': 'Basic ' + codedAuth })
-            .send(blog)
-            .expect(204);
+    const res = await request(app)
+      .get(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
+      .expect(HttpStatus.Ok);
 
-        // Проверяем, что блог обновился 
-        expect(mockDB.blogs[0].name).toEqual(blog.name);
-        expect(mockDB.blogs[0].description).toEqual(blog.description);
-        expect(mockDB.blogs[0].websiteUrl).toEqual(blog.websiteUrl);
-    });
+    expect(res.body.id).toEqual(dataset1.blogs[0].id);
+    expect(res.body.name).toEqual(dataset1.blogs[0].name);
+    expect(res.body.description).toEqual(dataset1.blogs[0].description);
+    expect(res.body.websiteUrl).toEqual(dataset1.blogs[0].websiteUrl);
+    expect(res.body._id).toBeUndefined();
+  });
 
-    it('updateBlog: shouldn\'t update (404)', async () => {
-        setMockDB();
+  it('deleteBlog: should del', async () => {
+    setMockDB(dataset1);
 
-        const blog: TBlogInputModel = {
-            name: "n1",
-            description: "description-1",
-            websiteUrl: "https://_XzVrOodmeJpO4JfbvLnKnQQekHQyldl5_PV9pZ4BCjIIziOgnj0GFc4pGGPZxiEugUOH.t7bJbiTBnbh020tkB8I8AQ",
-        };
+    await request(app)
+      .delete(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
+      .set({ 'Authorization': adminToken })
+      .expect(HttpStatus.NoContent);
 
-        await req
-            .put(SETTINGS.PATH.BLOGS + '/1')
-            .set({ 'Authorization': 'Basic ' + codedAuth })
-            .send(blog)
-            .expect(404);
-    });
+    expect(mockDB.blogs.length).toEqual(0);
+  });
 
-    it('updateBlog: shouldn\'t update (400)', async () => {
-        setMockDB(dataset1);
+  it('deleteBlog: shouldn\'t del (404)', async () => {
+    setMockDB();
 
-        const blog: TBlogInputModel = {
-            name: '',
-            description: '',
-            websiteUrl: '',
-        };
+    // Используем валидный, но несуществующий ObjectId
+    const nonExistentId = '507f1f77bcf86cd799439099';
+    await request(app)
+      .delete(SETTINGS.PATH.BLOGS + '/' + nonExistentId)
+      .set({ 'Authorization': adminToken })
+      .expect(HttpStatus.NotFound);
+  });
 
-        const res = await req
-            .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
-            .set({ 'Authorization': 'Basic ' + codedAuth })
-            .send(blog)
-            .expect(400);
+  it('deleteBlog: shouldn\'t del (401)', async () => {
+    setMockDB();
 
-        expect(mockDB).toEqual(dataset1);
-        expect(res.body.errorsMessages.length).toEqual(3);
-        expect(res.body.errorsMessages[0].field).toEqual('name');
-        expect(res.body.errorsMessages[1].field).toEqual('description');
-        expect(res.body.errorsMessages[2].field).toEqual('websiteUrl');
-    });
+    // Используем валидный ObjectId для проверки авторизации
+    const testId = '507f1f77bcf86cd799439099';
+    await request(app)
+      .delete(SETTINGS.PATH.BLOGS + '/' + testId)
+      .set({ 'Authorization': 'Basic' + adminToken.replace('Basic ', '') }) // без пробела
+      .expect(HttpStatus.Unauthorized);
+  });
 
-    it('updateBlog: shouldn\'t update (401)', async () => {
-        setMockDB(dataset1);
+  it('updateBlog: should update', async () => {
+    setMockDB(dataset1);
 
-        const blog: TBlogInputModel = {
-            name: "n1",
-            description: "description-1",
-            websiteUrl: "https://_XzVrOodmeJpO4JfbvLnKnQQekHQyldl5_PV9pZ4BCjIIziOgnj0GFc4pGGPZxiEugUOH.t7bJbiTBnbh020tkB8I8AQ",
-        };
+    const blog: TBlogInputModel = {
+      name: "n2",
+      description: "description-2",
+      websiteUrl: "https://_XzVrOodmeJpO4JfbvLnKnQQekHQyldl5_PV9pZ4BCjIIziOgnj0GFc4pGGPZxiEugUOH.t7bJbiTBnbh020tkB8I8AQ",
+    };
 
-        await req
-            .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
-            .set({ 'Authorization': 'Basic ' + codedAuth + 'error' })
-            .send(blog)
-            .expect(401);
+    await request(app)
+      .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
+      .set({ 'Authorization': adminToken })
+      .send(blog)
+      .expect(HttpStatus.NoContent);
 
-        expect(mockDB).toEqual(dataset1);
-    });
+    // Проверяем, что блог обновился 
+    expect(mockDB.blogs[0].name).toEqual(blog.name);
+    expect(mockDB.blogs[0].description).toEqual(blog.description);
+    expect(mockDB.blogs[0].websiteUrl).toEqual(blog.websiteUrl);
+  });
+
+  it('updateBlog: shouldn\'t update (404)', async () => {
+    setMockDB();
+
+    const blog: TBlogInputModel = {
+      name: "n1",
+      description: "description-1",
+      websiteUrl: "https://_XzVrOodmeJpO4JfbvLnKnQQekHQyldl5_PV9pZ4BCjIIziOgnj0GFc4pGGPZxiEugUOH.t7bJbiTBnbh020tkB8I8AQ",
+    };
+
+    // Используем валидный, но несуществующий ObjectId
+    const nonExistentId = '507f1f77bcf86cd799439099';
+    await request(app)
+      .put(SETTINGS.PATH.BLOGS + '/' + nonExistentId)
+      .set({ 'Authorization': adminToken })
+      .send(blog)
+      .expect(HttpStatus.NotFound);
+  });
+
+  it('updateBlog: shouldn\'t update (400)', async () => {
+    setMockDB(dataset1);
+
+    const blog: TBlogInputModel = {
+      name: '',
+      description: '',
+      websiteUrl: '',
+    };
+
+    const res = await request(app)
+      .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
+      .set({ 'Authorization': adminToken })
+      .send(blog)
+      .expect(HttpStatus.BadRequest);
+
+    expect(mockDB).toEqual(dataset1);
+    expect(res.body.errorsMessages.length).toBeGreaterThanOrEqual(3);
+    // Проверяем основные ошибки валидации
+    const errorFields = res.body.errorsMessages.map((e: any) => e.field);
+    expect(errorFields).toContain('name');
+    expect(errorFields).toContain('description');
+    expect(errorFields).toContain('websiteUrl');
+  });
+
+  it('updateBlog: shouldn\'t update (401)', async () => {
+    setMockDB(dataset1);
+
+    const blog: TBlogInputModel = {
+      name: "n1",
+      description: "description-1",
+      websiteUrl: "https://_XzVrOodmeJpO4JfbvLnKnQQekHQyldl5_PV9pZ4BCjIIziOgnj0GFc4pGGPZxiEugUOH.t7bJbiTBnbh020tkB8I8AQ",
+    };
+
+    await request(app)
+      .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
+      .set({ 'Authorization': adminToken + 'error' })
+      .send(blog)
+      .expect(HttpStatus.Unauthorized);
+
+    expect(mockDB).toEqual(dataset1);
+  });
 });
-

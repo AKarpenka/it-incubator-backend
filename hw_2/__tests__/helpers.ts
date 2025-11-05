@@ -1,9 +1,8 @@
-import { TBlog, TPost } from "../src/types/TDataBase";
-import { mockDB } from "./mocks";
+import { mockDB, TDataBase } from "./mocks";
 
 export type ReadonlyDBType = {
-  blogs: Readonly<TBlog[]>;
-  posts: Readonly<TPost[]>;
+  blogs: Readonly<TDataBase['blogs']>;
+  posts: Readonly<TDataBase['posts']>;
 };
 
 export const setMockDB = (dataset?: Partial<ReadonlyDBType>) => {
