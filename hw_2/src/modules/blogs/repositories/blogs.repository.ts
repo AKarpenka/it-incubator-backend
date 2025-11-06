@@ -39,10 +39,10 @@ export const blogsRepository = {
         return await blogsCollection.findOne({ _id: new ObjectId(id) });
     },
 
-    createBlog: async (blog: TBlog): Promise<WithId<TBlog>> => {
+    createBlog: async (blog: TBlog): Promise<ObjectId> => {
         const newBlog = await blogsCollection.insertOne(blog);
 
-        return { ...blog, _id: newBlog.insertedId};
+        return newBlog.insertedId;
     },
 
     updateBlogById: async (id: string, blog: TBlogDTO): Promise<WithId<TBlog> | null> => {

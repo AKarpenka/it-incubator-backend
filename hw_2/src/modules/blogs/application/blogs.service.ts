@@ -17,7 +17,14 @@ export const blogsService = {
     },
 
     async createBlog(blog: TBlog): Promise<WithId<TBlog>> {
-        return await blogsRepository.createBlog(blog);
+        const insertedId = await blogsRepository.createBlog(blog);
+
+        return {
+            ...blog, 
+            _id: insertedId,
+            createdAt: blog.createdAt ?? new Date().toISOString(),
+            isMembership: blog.isMembership ?? true,
+        };
     },
 
     async updateBlogById(id: string, blog: TBlogDTO): Promise<WithId<TBlog> | null> {
