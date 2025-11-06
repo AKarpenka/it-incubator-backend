@@ -12,7 +12,13 @@ import { PostsSortBy } from "../../posts/constants";
 export const blogsRouter = Router();
 
 blogsRouter
-    .get('/:id/posts', idValidation, paginationAndSortingValidation(PostsSortBy), errorsResultMiddleware, getPostsByBlogHandler)
+    .get(
+        '/:id/posts', 
+        idValidation, 
+        paginationAndSortingValidation(PostsSortBy), 
+        errorsResultMiddleware, 
+        getPostsByBlogHandler
+    )
     .get('/:id', idValidation, errorsResultMiddleware, getBlogsByIdHandler)
     .get(
         '/',  

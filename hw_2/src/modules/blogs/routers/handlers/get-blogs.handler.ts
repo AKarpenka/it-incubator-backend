@@ -17,7 +17,9 @@ export async function getBlogsHandler(req: Request<{}, {}, {}, Partial<TBlogQuer
             totalCount,
         });
 
-        res.send(blogsViewModel);
+        res
+            .status(HttpStatus.Ok)
+            .json(blogsViewModel);
     } catch (e: unknown) {
         res.sendStatus(HttpStatus.InternalServerError);
     }
