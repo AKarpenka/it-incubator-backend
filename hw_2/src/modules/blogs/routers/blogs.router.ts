@@ -7,11 +7,12 @@ import { idValidation } from "../../../middlewares/validation/id-validators.midd
 import { paginationAndSortingValidation } from "../../../middlewares/validation/pagination-sorting-validation.middleware";
 import { BlogsSortBy } from "../constants";
 import { postsByBlogValidatorMiddleware } from "./middlewares/posts-by-blog-validators.middleware";
+import { PostsSortBy } from "../../posts/constants";
 
 export const blogsRouter = Router();
 
 blogsRouter
-    .get('/:id/posts', idValidation, errorsResultMiddleware, getPostsByBlogHandler)
+    .get('/:id/posts', idValidation, paginationAndSortingValidation(PostsSortBy), errorsResultMiddleware, getPostsByBlogHandler)
     .get('/:id', idValidation, errorsResultMiddleware, getBlogsByIdHandler)
     .get(
         '/',  
