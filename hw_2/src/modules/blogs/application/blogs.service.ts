@@ -23,7 +23,7 @@ export const blogsService = {
             ...blog, 
             _id: insertedId,
             createdAt: blog.createdAt ?? new Date().toISOString(),
-            isMembership: blog.isMembership ?? true,
+            isMembership: blog.isMembership ?? false,
         };
     },
 
