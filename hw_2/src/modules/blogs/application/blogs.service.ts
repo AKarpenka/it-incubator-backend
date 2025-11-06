@@ -17,13 +17,17 @@ export const blogsService = {
     },
 
     async createBlog(blog: TBlog): Promise<WithId<TBlog>> {
-        const insertedId = await blogsRepository.createBlog(blog);
+        const newBlog: TBlog = {
+            ...blog,
+            createdAt: new Date().toISOString(),
+            isMembership: false,
+        };
+
+        const insertedId = await blogsRepository.createBlog(newBlog);
 
         return {
-            ...blog, 
+            ...newBlog, 
             _id: insertedId,
-            createdAt: blog.createdAt ?? new Date().toISOString(),
-            isMembership: blog.isMembership ?? false,
         };
     },
 
