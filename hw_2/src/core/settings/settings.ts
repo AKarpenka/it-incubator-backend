@@ -7,6 +7,8 @@ export const SETTINGS = {
         BLOGS: '/api/blogs',
         POSTS: '/api/posts',
         TESTING: '/api/testing',
+        USERS: '/api/users',
+        AUTH: '/api/auth',
     },
     ADMIN: process.env.ADMIN || 'admin:qwerty' || 'admin\qwerty',
     MONGO_URL: process.env.MONGO_URL,

@@ -1,4 +1,4 @@
-import { blogsRouter, postsRouter, testingRouter } from './modules';
+import { authRouter, blogsRouter, postsRouter, testingRouter, usersRouter } from './modules';
 import { SETTINGS } from './core/settings/settings';
 import express, { Express } from 'express';
 import cors from 'cors';
@@ -12,6 +12,8 @@ export const setupApp = (app: Express) => {
   app.use(SETTINGS.PATH.BLOGS, blogsRouter);
   app.use(SETTINGS.PATH.POSTS, postsRouter);
   app.use(SETTINGS.PATH.TESTING, testingRouter);
+  app.use(SETTINGS.PATH.USERS, usersRouter);
+  app.use(SETTINGS.PATH.AUTH, authRouter);
 
   setupSwagger(app);
 
