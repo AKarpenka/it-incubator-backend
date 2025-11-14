@@ -17,11 +17,14 @@ export const usersQueryRepository = {
         const skip = (pageNumber - 1) * pageSize;
         const filter: any = {};
 
-        if (searchLoginTerm) {
+        if (searchLoginTerm && searchEmailTerm) {
+            filter.$or = [
+                { login: { $regex: searchLoginTerm, $options: 'i' } },
+                { email: { $regex: searchEmailTerm, $options: 'i' } }
+            ];
+        } else if (searchLoginTerm) {
             filter.login = { $regex: searchLoginTerm, $options: 'i' };
-        }
-
-        if (searchEmailTerm) {
+        } else if (searchEmailTerm) {
             filter.email = { $regex: searchEmailTerm, $options: 'i' };
         }
 
