@@ -18,3 +18,7 @@ get, put, delete: /api/posts/:id
 get, post: /api/blogs/
 get, put, delete: /api/blogs/:id
 get, post: api/blogs/:id/posts
+
+TODO:
+перевести все на cqrs 
+object result добавить везде
