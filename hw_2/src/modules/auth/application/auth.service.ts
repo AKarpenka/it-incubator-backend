@@ -2,11 +2,10 @@ import { argon2Service } from './argon2.service';
 import { Result } from "../../../core/types/resultTypes";
 import { Statuses } from "../../../core/types/resultStasuses";
 import { usersQueryRepository } from "../../../modules/users/repositories/users.query-repository";
-import { WithId } from "mongodb";
-import { TUser } from "../../../modules/users/types/user";
+import { jwtService } from './jwt.service';
 
 export const authService = {
-    loginUser: async (loginOrEmail: string, password: string): Promise<Result<WithId<TUser> | null>> => {
+    loginUser: async (loginOrEmail: string, password: string): Promise<Result<{ accessToken: string } | null>> => {
         const user = await usersQueryRepository.findByLoginOrEmail(loginOrEmail);
 
         if(!user) {
@@ -29,9 +28,11 @@ export const authService = {
             };
         }
 
+        const accessToken = jwtService.createToken(user);
+
         return {
             status: Statuses.Success,
-            data: user,
+            data: accessToken,
             extensions: [],
         };
     }

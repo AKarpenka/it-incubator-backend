@@ -1,5 +1,5 @@
 import { HttpStatus } from '../../../core/types/httpStatuses';
-import { blogsCollection, postsCollection, usersCollection } from '../../../db/db';
+import { blogsCollection, commentsCollection, postsCollection, usersCollection } from '../../../db/db';
 import { Router, Request, Response } from "express";
 
 export const testingRouter = Router();
@@ -10,6 +10,7 @@ testingRouter.delete('/all-data', async (_req: Request, res: Response) => {
       await blogsCollection.deleteMany({});
       await postsCollection.deleteMany({});
       await usersCollection.deleteMany({});
+      await commentsCollection.deleteMany({});
   
       res
         .status(HttpStatus.NoContent)

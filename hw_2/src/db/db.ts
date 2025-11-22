@@ -3,17 +3,20 @@ import { SETTINGS } from '../core/settings/settings';
 import { TBlog } from "../modules/blogs/types/blog";
 import { TPost } from "../modules/posts/types/post";
 import { TUser } from "../modules/users/types/user";
+import { TComment } from "../modules/comments/types/comment";
 
 const MONGO_URL = SETTINGS.MONGO_URL;
 const MONGODB_NAME = SETTINGS.MONGODB_NAME;
 const BLOGS_COLLECTION_NAME = 'blogs';
 const POSTS_COLLECTION_NAME = 'posts';
 const USERS_COLLECTION_NAME = 'users';
+const COMMENTS_COLLECTION_NAME = 'comments';
 
 export let client: MongoClient;
 export let blogsCollection: Collection<TBlog>;
 export let postsCollection: Collection<TPost>;
 export let usersCollection: Collection<TUser>;
+export let commentsCollection: Collection<TComment>;
 
 export const runDB = async () => {
     if(!MONGO_URL) {
@@ -29,6 +32,7 @@ export const runDB = async () => {
     blogsCollection = db.collection<TBlog>(BLOGS_COLLECTION_NAME);
     postsCollection = db.collection<TPost>(POSTS_COLLECTION_NAME);
     usersCollection = db.collection<TUser>(USERS_COLLECTION_NAME);
+    commentsCollection = db.collection<TComment>(COMMENTS_COLLECTION_NAME);
 
     try {
         await client.connect();

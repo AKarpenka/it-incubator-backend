@@ -4,7 +4,6 @@ import { postsService } from '../../application/posts.service';
 
 export async function deletePostByIdHandler(req: Request, res: Response) {
     try {
-        //todo тут вынести в сервис 
         const deletedPostId = await postsService.deletePostById(req.params.id);
 
         if(deletedPostId === null) {

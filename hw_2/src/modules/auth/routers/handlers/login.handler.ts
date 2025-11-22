@@ -13,11 +13,13 @@ export async function loginHandler(req: Request, res: Response) {
             res
                 .status(HttpStatus.Unauthorized)
                 .send(result.extensions);
+                
             return;
         }
 
         res
-            .sendStatus(HttpStatus.NoContent);
+            .status(HttpStatus.Ok)
+            .send(result.data);
             
     } catch (e: unknown) {
         res.sendStatus(HttpStatus.InternalServerError);
