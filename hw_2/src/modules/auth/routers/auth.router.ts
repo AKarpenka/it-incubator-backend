@@ -5,7 +5,8 @@
 import { Router } from "express";
 import { errorsResultMiddleware } from "../../../middlewares/validation/errors-result.middleware";
 import { loginValidatorMiddleware } from "./middlewares/login-validators.middleware";
-import { loginHandler } from "./handlers";
+import { getCurrentUserHandler, loginHandler } from "./handlers";
+import { accessTokenMiddleware } from "../../../middlewares/auth/access-token.middleware";
 
 export const authRouter = Router();
 
@@ -15,4 +16,11 @@ authRouter
         ...loginValidatorMiddleware,
         errorsResultMiddleware,
         loginHandler
+    )
+
+    .get(
+        '/me',
+        accessTokenMiddleware,
+        getCurrentUserHandler
+
     )

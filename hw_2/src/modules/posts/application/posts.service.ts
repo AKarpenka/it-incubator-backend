@@ -64,10 +64,9 @@ export const postsService = {
             return null;
         };
 
-        const deletedBlog = await postsRepository.deletePostById(id);
-
+        const deletedPost = await postsRepository.deletePostById(id);
         
-        if (deletedBlog.deletedCount < 1) {
+        if (deletedPost.deletedCount < 1) {
             return null;
         }
 

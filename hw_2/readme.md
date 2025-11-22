@@ -22,3 +22,5 @@ get, post: api/blogs/:id/posts
 TODO:
 перевести все на cqrs 
 object result добавить везде
+
+//ToDo проверить что все по коду норм и залить 
