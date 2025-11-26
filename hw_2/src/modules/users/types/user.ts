@@ -6,6 +6,11 @@ export type TUser = {
     email: string;
     password: string;
     createdAt: string;
+    emailConfirmation: {
+        confirmationCode: string,
+        expirationDate: Date,
+        isConfirmed: boolean
+    }
 }
 
 export type TUserQueryInput = TPaginationAndSorting<UsersSortBy> & {

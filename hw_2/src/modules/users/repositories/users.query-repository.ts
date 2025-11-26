@@ -57,5 +57,9 @@ export const usersQueryRepository = {
         return await usersCollection.findOne({
           $or: [{ email: loginOrEmail }, { login: loginOrEmail }],
         });
-      },
+    },
+
+    findUserByConfirmationCode: async (code: string): Promise<{ user: WithId<TUser> | null }> => {
+        return { user: await usersCollection.findOne({ 'emailConfirmation.confirmationCode': code }) }
+    }
 }

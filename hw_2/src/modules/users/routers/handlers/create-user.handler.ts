@@ -6,7 +6,7 @@ import { mapToUsersViewModel } from '../mappers/map-to-users-view-model.util';
 
 export async function createUserHandler(req: Request<{}, {}, TUserDTO>, res: Response) {
     try {
-        const { user } = await usersService.createUser(req.body);
+        const { user } = await usersService.createUser(req.body, true);
 
         if(!user) {
             res

@@ -1,7 +1,7 @@
-import jwt, { JwtPayload } from 'jsonwebtoken';
-import { TUser } from '../../../modules/users/types/user';
+import jwt from 'jsonwebtoken';
 import { WithId } from 'mongodb';
-import { SETTINGS } from '../../../core/settings/settings';
+import { TUser } from '../../modules/users/types/user';
+import { SETTINGS } from '../settings/settings';
 
 export const jwtService = {
     createToken: (user: WithId<TUser>): { accessToken: string } => {
