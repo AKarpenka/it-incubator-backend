@@ -12,7 +12,7 @@ export const userLoginValidator = body('login')
     .matches(/^[a-zA-Z0-9_-]*$/)
     .withMessage('Login should include only symbols')
     .custom(async (login) => {
-        const isLoginExist = await usersQueryRepository.checkFieldTaken(login);
+        const isLoginExist = await usersQueryRepository.checkFieldTaken('login', login);
 
         if(isLoginExist) {
             return Promise.reject('login already taken');
@@ -32,10 +32,10 @@ export const userEmailValidator = body('email')
     .withMessage('Email should be string')
     .notEmpty()
     .withMessage('Email shouldnt be empty')
-    .matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)
+    .matches(/^[\w.+-]+@([\w-]+\.)+[\w-]{2,4}$/)
     .withMessage('Email should looks like example@example.com')
     .custom(async (email) => {
-        const isEmailExist = await usersQueryRepository.checkFieldTaken(email);
+        const isEmailExist = await usersQueryRepository.checkFieldTaken('email', email);
 
         if(isEmailExist) {
             return Promise.reject('Email already exist');
