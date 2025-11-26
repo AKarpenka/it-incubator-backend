@@ -3,10 +3,12 @@ import { TUser } from "../types/user";
 import { TUserDTO } from "../repositories/dto/users-input.dto";
 import { usersQueryRepository } from "../repositories/users.query-repository";
 import { usersRepository } from "../repositories/user.repository";
-import { argon2Service } from "../../auth/application/argon2.service";
+import { argon2Service } from "../../../core/adapters/argon2.service";
+import { v4 as uuid } from 'uuid';
+import { add } from "date-fns";
 
 export const usersService = {
-    createUser: async (inputUser: TUserDTO): Promise<{ user: WithId<TUser> | null }> => {
+    createUser: async (inputUser: TUserDTO, isConfirmed?: boolean): Promise<{ user: WithId<TUser> | null }> => {
         const passwordHash = await argon2Service.generateHash(inputUser.password);
 
         const newUser: TUser = {
@@ -14,6 +16,13 @@ export const usersService = {
             email: inputUser.email,
             password: passwordHash,
             createdAt: new Date().toISOString(),
+            emailConfirmation: {
+                confirmationCode: uuid(),
+                expirationDate: add(new Date(), {
+                    minutes: 1
+                }),
+                isConfirmed: isConfirmed ?? false,
+            }
         };
 
         const { insertedId } = await usersRepository.createUser(newUser);

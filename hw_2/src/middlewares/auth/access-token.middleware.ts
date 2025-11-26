@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { HttpStatus } from "../../core/types/httpStatuses";
-import { jwtService } from "../../modules/auth/application/jwt.service";
+import { jwtService } from "../../core/adapters/jwt.service";
 
 const TYPE_OF_AUTH = `Bearer`;
 
