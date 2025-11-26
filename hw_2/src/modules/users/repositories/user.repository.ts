@@ -1,5 +1,5 @@
 import { usersCollection } from "../../../db/db";
-import { DeleteResult, ObjectId, WithId } from "mongodb";
+import { DeleteResult, ModifyResult, ObjectId, WithId } from "mongodb";
 import { TUser } from "../types/user";
 import { v4 as uuid } from "uuid";
 
@@ -13,22 +13,22 @@ export const usersRepository = {
     },
 
     confirmUserByConfirmationCode: async (confirmationCode: string): Promise<{user: WithId<TUser> | null}> => {
-        return {
-            user: await usersCollection.findOneAndUpdate(
-                { 'emailConfirmation.confirmationCode': confirmationCode },
-                { $set: { 'emailConfirmation.isConfirmed': true } },
-                { returnDocument: 'after' },
-            )
-        }
+        const { value: user } = await usersCollection.findOneAndUpdate(
+            { 'emailConfirmation.confirmationCode': confirmationCode },
+            { $set: { 'emailConfirmation.isConfirmed': true } },
+            { returnDocument: 'after' },
+        ) as unknown as ModifyResult<TUser>;
+
+        return { user };
     },
 
     updateConfirmationCode: async (email: string): Promise<{user: WithId<TUser> | null}> => {
-        return {
-            user: await usersCollection.findOneAndUpdate(
-                { email: email },
-                { $set: { 'emailConfirmation.confirmationCode': uuid() } },
-                { returnDocument: 'after' },
-            )
-        }
+        const { value: user } = await usersCollection.findOneAndUpdate(
+            { email: email },
+            { $set: { 'emailConfirmation.confirmationCode': uuid() } },
+            { returnDocument: 'after' },
+        ) as unknown as ModifyResult<TUser>;
+
+        return { user };
     },
 }

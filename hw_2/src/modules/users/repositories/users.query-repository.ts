@@ -45,8 +45,8 @@ export const usersQueryRepository = {
         }
     },
 
-    checkFieldTaken: async (field: string): Promise<WithId<TUser> | null> => {
-        return await usersCollection.findOne({ [field]: field })
+    checkFieldTaken: async (field: keyof Pick<TUser, 'login' | 'email'>, value: string): Promise<WithId<TUser> | null> => {
+        return await usersCollection.findOne({ [field]: value })
     },
 
     getUserById: async (id: string | ObjectId): Promise<{ user: WithId<TUser> | null }> => ({
