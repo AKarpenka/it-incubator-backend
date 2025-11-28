@@ -16,7 +16,7 @@ export const authorizationMiddleware = (
     res: Response, 
     next: NextFunction,
 ) => {
-    const auth = req.headers['authorization'] as string;
+    const auth = (req.headers['authorization'] || req.headers['Authorization']) as string;
 
     if (!auth || auth.slice(0, 6) !== `${TYPE_OF_AUTH} `) {
         res
