@@ -161,12 +161,10 @@ function sendEmail (user: WithId<TUser>) {
     // тут хардкод, который на фронт отправляет рандомную ссылку с кодом подтверждения
     // и затем фронт еще один пост запрос делает для вызова логики подтверждения 
     const subject = 'Registration confirm';
-    const message = `
-        <h1>Thank for your registration</h1>
-        <p>To finish registration please follow the link below:
-            <a href='${SETTINGS.PATH.BASE_URL}${SETTINGS.PATH.AUTH}/registration-confirmation?code=${user.emailConfirmation.confirmationCode}'>complete registration</a>
-        </p>
-    `;
+    const message = ` <h1>Thank for your registration</h1>
+               <p>To finish registration please follow the link below:<br>
+                  <a href='https://somesite.com/confirm-email?code=${user.emailConfirmation.confirmationCode}'>complete registration</a>
+              </p>`;
 
     nodemailerService
         .sendEmail(user.email, subject, message)
