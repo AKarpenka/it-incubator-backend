@@ -1,1 +1,0 @@
-{"version":3,"file":"clear-db.js","sourceRoot":"","sources":["clear-db.ts"],"names":[],"mappings":";;;;;;;;;;;;;;AAKA,0BAKC;AAVD,0DAAgC;AAEhC,+DAA4D;AAC5D,oEAA+D;AAE/D,SAAsB,OAAO,CAAC,GAAY;;QACxC,MAAM,IAAA,mBAAO,EAAC,GAAG,CAAC;aACf,MAAM,CAAC,GAAG,mBAAQ,CAAC,IAAI,CAAC,OAAO,WAAW,CAAC;aAC3C,MAAM,CAAC,yBAAU,CAAC,SAAS,CAAC,CAAC;QAChC,OAAO;IACT,CAAC;CAAA"}
