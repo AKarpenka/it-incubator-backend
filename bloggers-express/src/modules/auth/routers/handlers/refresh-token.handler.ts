@@ -3,16 +3,22 @@ import { HttpStatus } from '../../../../core/types/httpStatuses';
 import { Statuses } from '../../../../core/types/resultStasuses';
 import { authService } from '../../application/auth.service';
 
-export async function loginHandler(req: Request, res: Response) {
+export async function refreshTokenHandler(req: Request, res: Response) {
     try {
-        const { loginOrEmail, password } = req.body;
+        if (!req.user) {
+            res
+                .status(HttpStatus.Unauthorized)
+                .json({});
+            
+            return;
+        }
 
-        const result = await authService.loginUser(loginOrEmail, password);
+        const result = await authService.refreshTokens(req.user.id);
 
         if (result.status !== Statuses.Success) {
             res
                 .status(HttpStatus.Unauthorized)
-                .send(result.extensions);
+                .json({});
                 
             return;
         }
@@ -26,10 +32,10 @@ export async function loginHandler(req: Request, res: Response) {
 
         res
             .status(HttpStatus.Ok)
-            .send({ accessToken: result.data?.accessToken });
+            .json({ accessToken: result.data?.accessToken });
             
     } catch (e: unknown) {
         res.sendStatus(HttpStatus.InternalServerError);
     }
-    
 }
+

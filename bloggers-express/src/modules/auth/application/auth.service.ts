@@ -12,7 +12,7 @@ import { TUser } from '../../../modules/users/types/user';
 import { usersRepository } from '../../../modules/users/repositories/user.repository';
 
 export const authService = {
-    loginUser: async (loginOrEmail: string, password: string): Promise<Result<{ accessToken: string } | null>> => {
+    loginUser: async (loginOrEmail: string, password: string): Promise<Result<{ accessToken: string, refreshToken: string } | null>> => {
         const user = await usersQueryRepository.findByLoginOrEmail(loginOrEmail);
 
         if(!user) {
@@ -35,11 +35,15 @@ export const authService = {
             };
         }
 
-        const accessToken = jwtService.createToken(user);
+        const { accessToken } = jwtService.createAccessToken(user);
+        const { refreshToken } = jwtService.createRefreshToken(user._id.toString());
 
         return {
             status: Statuses.Success,
-            data: accessToken,
+            data: {
+                accessToken,
+                refreshToken
+            },
             extensions: [],
         };
     },
@@ -152,6 +156,31 @@ export const authService = {
         return {
             status: Statuses.Success,
             data: updatedUser,
+            extensions: [],
+        };
+    },
+
+    refreshTokens: async (userId: string): Promise<Result<{ accessToken: string, refreshToken: string } | null>> => {
+        const { user } = await usersQueryRepository.getUserById(userId);
+
+        if(!user) {
+            return {
+                status: Statuses.NotFound,
+                data: null,
+                errorMessage: 'Not Found',
+                extensions: [{ field: 'userId', message: 'User not found' }],
+            };
+        }
+
+        const { accessToken } = jwtService.createAccessToken(user);
+        const { refreshToken } = jwtService.createRefreshToken(user._id.toString());
+
+        return {
+            status: Statuses.Success,
+            data: {
+                accessToken,
+                refreshToken
+            },
             extensions: [],
         };
     },

@@ -4,7 +4,7 @@ import { TUser } from '../../modules/users/types/user';
 import { SETTINGS } from '../settings/settings';
 
 export const jwtService = {
-    createToken: (user: WithId<TUser>): { accessToken: string } => {
+    createAccessToken: (user: WithId<TUser>): { accessToken: string } => {
         const payload = {
             email: user.email,
             login: user.login,
@@ -15,7 +15,7 @@ export const jwtService = {
             payload, 
             SETTINGS.SECRET_KEY,
             {
-                expiresIn: '24h'
+                expiresIn: '10s'
             }
         );
 
@@ -30,5 +30,18 @@ export const jwtService = {
         } catch(error: unknown) {
             return null;
         }
-    }
+    },
+
+    createRefreshToken: (userId: string): { refreshToken: string } => {
+        const refreshToken = jwt.sign(
+            { userId }, 
+            SETTINGS.SECRET_KEY,
+            {
+                expiresIn: '20s'
+            }
+        );
+
+        return { refreshToken };
+    },
+
 }
