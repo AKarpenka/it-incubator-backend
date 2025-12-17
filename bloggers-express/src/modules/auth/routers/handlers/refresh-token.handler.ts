@@ -2,10 +2,11 @@ import { Request, Response } from 'express';
 import { HttpStatus } from '../../../../core/types/httpStatuses';
 import { Statuses } from '../../../../core/types/resultStasuses';
 import { authService } from '../../application/auth.service';
+import { refreshTokenBlacklistService } from '../../../../core/adapters/refresh-token-blacklist.service';
 
 export async function refreshTokenHandler(req: Request, res: Response) {
     try {
-        if (!req.user) {
+        if (!req.user || !req.refreshToken) {
             res
                 .status(HttpStatus.Unauthorized)
                 .json({});
@@ -22,6 +23,9 @@ export async function refreshTokenHandler(req: Request, res: Response) {
                 
             return;
         }
+
+        // Инвалидируем старый токен
+        await refreshTokenBlacklistService.invalidateToken(req.refreshToken);
 
         res.cookie('refreshToken', result.data?.refreshToken, {
             httpOnly: true, 
