@@ -3,11 +3,12 @@ import { SETTINGS } from './core/settings/settings';
 import express, { Express } from 'express';
 import cors from 'cors';
 import { setupSwagger } from './core/swagger/setup-swagger';
+import cookieParser from 'cookie-parser';
 
 export const setupApp = (app: Express) => {
   app.use(express.json());
-  
   app.use(cors());
+  app.use(cookieParser())
 
   app.use(SETTINGS.PATH.BLOGS, blogsRouter);
   app.use(SETTINGS.PATH.POSTS, postsRouter);

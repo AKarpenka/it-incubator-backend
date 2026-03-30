@@ -5,8 +5,9 @@
 import { Router } from "express";
 import { errorsResultMiddleware } from "../../../middlewares/validation/errors-result.middleware";
 import { loginValidatorMiddleware } from "./middlewares/login-validators.middleware";
-import { getCurrentUserHandler, loginHandler, registartionHandler, registrationConfirmationHandler, registrationEmailResendingHandler } from "./handlers";
+import { getCurrentUserHandler, loginHandler, registartionHandler, registrationConfirmationHandler, registrationEmailResendingHandler, refreshTokenHandler, logoutHandler } from "./handlers";
 import { accessTokenMiddleware } from "../../../middlewares/auth/access-token.middleware";
+import { refreshTokenMiddleware } from "../../../middlewares/auth/refresh-token.middleware";
 import { usersValidatorMiddleware } from "../../../modules/users/routers/middlewares/users-validators.middleware";
 import { registrationConfirmationValidatorMiddleware } from "./middlewares/registration-confirmation-validator.middleware";
 import { registrationEmailResendingValidatorMiddleware } from "./middlewares/registration-email-resending-validator.middleware";
@@ -19,6 +20,12 @@ authRouter
         ...loginValidatorMiddleware,
         errorsResultMiddleware,
         loginHandler
+    )
+
+    .post(
+        '/refresh-token',
+        refreshTokenMiddleware,
+        refreshTokenHandler
     )
 
     .post(
@@ -40,6 +47,12 @@ authRouter
         ...registrationEmailResendingValidatorMiddleware,
         errorsResultMiddleware,
         registrationEmailResendingHandler 
+    )
+
+    .post(
+        '/logout',
+        refreshTokenMiddleware,
+        logoutHandler 
     )
 
     .get(
