@@ -9,7 +9,7 @@ export async function deleteAllDevicesHandler(req: Request<{}, {}, {}, {}, TUser
         const user = req.user;
 
         const currentRT = req.cookies.refreshToken;
-        const verifiedRefreshToken = jwtService.verifyToken(currentRT);
+        const verifiedRefreshToken = jwtService.verifyRefreshToken(currentRT);
 
         if(!user || !verifiedRefreshToken || !verifiedRefreshToken.userId) {
             res

@@ -24,10 +24,33 @@ export const jwtService = {
         }
     },
 
-    verifyToken: (token: string): { userId: string, deviceId: string} | null => {
+    verifyAccessToken: (token: string): { userId: string } | null => {
         try {
-            return jwt.verify(token, SETTINGS.SECRET_KEY) as { userId: string, deviceId: string};
-        } catch(error: unknown) {
+            const payload = jwt.verify(token, SETTINGS.SECRET_KEY) as jwt.JwtPayload & { userId: string };
+            if (!payload.userId) {
+                return null;
+            }
+            return { userId: String(payload.userId) };
+        } catch {
+            return null;
+        }
+    },
+
+    verifyRefreshToken: (token: string): { userId: string; deviceId: string; iat: number } | null => {
+        try {
+            const payload = jwt.verify(token, SETTINGS.SECRET_KEY) as jwt.JwtPayload & {
+                userId: string;
+                deviceId: string;
+            };
+            if (typeof payload.iat !== 'number' || !payload.userId || !payload.deviceId) {
+                return null;
+            }
+            return {
+                userId: String(payload.userId),
+                deviceId: payload.deviceId,
+                iat: payload.iat,
+            };
+        } catch {
             return null;
         }
     },

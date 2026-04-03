@@ -20,7 +20,7 @@ export const accessTokenMiddleware = (
         return;
     }
 
-    const verifiedToken = jwtService.verifyToken(token);
+    const verifiedToken = jwtService.verifyAccessToken(token);
 
     if(!verifiedToken || !verifiedToken.userId) {
         res
