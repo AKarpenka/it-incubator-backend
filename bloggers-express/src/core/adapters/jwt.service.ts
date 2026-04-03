@@ -15,7 +15,7 @@ export const jwtService = {
             payload, 
             SETTINGS.SECRET_KEY,
             {
-                expiresIn: '10s'
+                expiresIn: '10s' //todo вынести бы это в env
             }
         );
 
@@ -24,24 +24,32 @@ export const jwtService = {
         }
     },
 
-    verifyToken: (token: string): { userId: string} | null => {
+    verifyToken: (token: string): { userId: string, deviceId: string} | null => {
         try {
-            return jwt.verify(token, SETTINGS.SECRET_KEY) as { userId: string};
+            return jwt.verify(token, SETTINGS.SECRET_KEY) as { userId: string, deviceId: string};
         } catch(error: unknown) {
             return null;
         }
     },
 
-    createRefreshToken: (userId: string): { refreshToken: string } => {
+    createRefreshToken: (userId: string, deviceId: string): { refreshToken: string } => {
+        const payload = {
+            userId,
+            deviceId,
+        };
+        
         const refreshToken = jwt.sign(
-            { userId }, 
+            payload, 
             SETTINGS.SECRET_KEY,
             {
-                expiresIn: '20s'
+                expiresIn: '20s' //todo вынести бы это в env 
             }
         );
 
         return { refreshToken };
     },
 
+    decodePayloadToken: <T>(token: string): T => {
+        return jwt.decode(token) as T;
+    }
 }

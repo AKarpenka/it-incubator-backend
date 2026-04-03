@@ -4,6 +4,7 @@ import express, { Express } from 'express';
 import cors from 'cors';
 import { setupSwagger } from './core/swagger/setup-swagger';
 import cookieParser from 'cookie-parser';
+import { devicesRouter } from './modules/devices/routers/devices.router';
 
 export const setupApp = (app: Express) => {
   app.use(express.json());
@@ -15,6 +16,7 @@ export const setupApp = (app: Express) => {
   app.use(SETTINGS.PATH.TESTING, testingRouter);
   app.use(SETTINGS.PATH.USERS, usersRouter);
   app.use(SETTINGS.PATH.AUTH, authRouter);
+   app.use(SETTINGS.PATH.DEVICES, devicesRouter);
   app.use(SETTINGS.PATH.COMMENTS, commentsRouter);
 
   setupSwagger(app);

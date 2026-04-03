@@ -20,9 +20,9 @@ export const accessTokenMiddleware = (
         return;
     }
 
-    const verrifiredUserId = jwtService.verifyToken(token);
+    const verifiedToken = jwtService.verifyToken(token);
 
-    if(!verrifiredUserId || !verrifiredUserId.userId) {
+    if(!verifiedToken || !verifiedToken.userId) {
         res
             .status(HttpStatus.Unauthorized)
             .json({});
@@ -30,7 +30,7 @@ export const accessTokenMiddleware = (
         return;
     }
 
-    req.user = { id: verrifiredUserId.userId };
+    req.user = { id: verifiedToken.userId };
 
     next();
 }

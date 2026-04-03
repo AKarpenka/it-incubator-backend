@@ -4,7 +4,7 @@ import { TBlog } from "../modules/blogs/types/blog";
 import { TPost } from "../modules/posts/types/post";
 import { TUser } from "../modules/users/types/user";
 import { TComment } from "../modules/comments/types/comment";
-import { TBlacklistToken } from "../modules/auth/types/blacklist-token";
+import { TDevice } from "../modules/devices/types/device";
 
 const MONGO_URL = SETTINGS.MONGO_URL;
 const MONGODB_NAME = SETTINGS.MONGODB_NAME;
@@ -12,14 +12,15 @@ const BLOGS_COLLECTION_NAME = 'blogs';
 const POSTS_COLLECTION_NAME = 'posts';
 const USERS_COLLECTION_NAME = 'users';
 const COMMENTS_COLLECTION_NAME = 'comments';
-const BLACKLIST_TOKENS_COLLECTION_NAME = 'blacklist-tokens';
+const DEVICES_COLLECTION_NAME = 'devices';
 
 export let client: MongoClient;
 export let blogsCollection: Collection<TBlog>;
 export let postsCollection: Collection<TPost>;
 export let usersCollection: Collection<TUser>;
 export let commentsCollection: Collection<TComment>;
-export let blacklistTokensCollection: Collection<TBlacklistToken>;
+
+export let devicesCollection: Collection<TDevice>;
 
 export const runDB = async () => {
     if(!MONGO_URL) {
@@ -36,7 +37,7 @@ export const runDB = async () => {
     postsCollection = db.collection<TPost>(POSTS_COLLECTION_NAME);
     usersCollection = db.collection<TUser>(USERS_COLLECTION_NAME);
     commentsCollection = db.collection<TComment>(COMMENTS_COLLECTION_NAME);
-    blacklistTokensCollection = db.collection<TBlacklistToken>(BLACKLIST_TOKENS_COLLECTION_NAME);
+    devicesCollection = db.collection<TDevice>(DEVICES_COLLECTION_NAME);
 
     try {
         await client.connect();

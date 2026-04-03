@@ -7,7 +7,12 @@ export async function loginHandler(req: Request, res: Response) {
     try {
         const { loginOrEmail, password } = req.body;
 
-        const result = await authService.loginUser(loginOrEmail, password);
+        const result = await authService.loginUser({
+            loginOrEmail, 
+            password, 
+            deviceName: req.get('user-agent') ?? 'unknown',
+            ip: req.ip ?? 'unknown'
+        });
 
         if (result.status !== Statuses.Success) {
             res

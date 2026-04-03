@@ -3,5 +3,6 @@ export enum Statuses {
     NotFound = 'NotFound',
     Forbidden = 'Forbidden',
     Unauthorized = 'Unauthorized',
-    BadRequest = 'BadRequest'
+    BadRequest = 'BadRequest',
+    NoContent = 'NoContent',
 }
