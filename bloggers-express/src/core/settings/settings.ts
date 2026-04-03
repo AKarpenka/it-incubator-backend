@@ -10,7 +10,7 @@ export const SETTINGS = {
         TESTING: '/api/testing',
         USERS: '/api/users',
         AUTH: '/api/auth',
-        DEVICES: '/api/devices',
+        DEVICES: '/api/security/devices',
         COMMENTS: '/api/comments',
     },
     ADMIN: process.env.ADMIN || 'admin:qwerty' || 'admin\qwerty',
