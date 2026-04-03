@@ -93,11 +93,12 @@ export const authService = {
 
         const { refreshToken } = jwtService.createRefreshToken(userIdStr, newDevice.deviceId);
 
-        const expRTDate = jwtService.decodePayloadToken<{exp: number }>(refreshToken).exp;
+        const rtPayload = jwtService.decodePayloadToken<{ exp: number; iat: number }>(refreshToken);
 
         await devicesRepository.createNewDevice({
             ...newDevice,
-            expRTDate: new Date(expRTDate * 1000).toISOString()
+            lastActiveDate: new Date(rtPayload.iat * 1000).toISOString(),
+            expRTDate: new Date(rtPayload.exp * 1000).toISOString(),
         });
 
         return {
@@ -261,9 +262,7 @@ export const authService = {
             expRTDate: new Date(newRTPayload.exp * 1000).toISOString()
         }
 
-        const updatedDevice = await devicesRepository.updateDevice(deviceForUpdate);
-
-        console.log('updatedDevice', updatedDevice);
+        await devicesRepository.updateDevice(deviceForUpdate);
 
         return {
             status: Statuses.Success,

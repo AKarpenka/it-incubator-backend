@@ -1,6 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import { HttpStatus } from "../../core/types/httpStatuses";
 import { jwtService } from "../../core/adapters/jwt.service";
+import { devicesQueryRepository } from "../../modules/devices/repositories/devices.query-repository";
+
+function refreshTokenIatMatchesDevice(lastActiveDate: string, tokenIatSec: number): boolean {
+    const deviceIatSec = Math.floor(Date.parse(lastActiveDate) / 1000);
+    return deviceIatSec === tokenIatSec;
+}
 
 export const refreshTokenMiddleware = async (
     req: Request,
@@ -17,9 +23,30 @@ export const refreshTokenMiddleware = async (
         return;
     }
 
-    const verifiedRefreshToken = jwtService.verifyToken(refreshToken);
+    const verifiedRefreshToken = jwtService.verifyRefreshToken(refreshToken);
 
     if(!verifiedRefreshToken || !verifiedRefreshToken.userId) {
+        res
+            .status(HttpStatus.Unauthorized)
+            .json({});
+        
+        return;
+    }
+
+    const device = await devicesQueryRepository.getDeviceByParams({
+        userId: verifiedRefreshToken.userId,
+        deviceId: verifiedRefreshToken.deviceId,
+    });
+
+    if (!device) {
+        res
+            .status(HttpStatus.Unauthorized)
+            .json({});
+        
+        return;
+    }
+
+    if (!refreshTokenIatMatchesDevice(device.lastActiveDate, verifiedRefreshToken.iat)) {
         res
             .status(HttpStatus.Unauthorized)
             .json({});

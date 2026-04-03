@@ -5,8 +5,6 @@ import { authService } from '../../application/auth.service';
 
 export async function refreshTokenHandler(req: Request, res: Response) {
     try {
-        console.log('REFRESH');
-
         if (!req.user || !req.refreshToken) {
             res
                 .status(HttpStatus.Unauthorized)
