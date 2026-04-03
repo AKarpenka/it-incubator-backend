@@ -10,6 +10,8 @@ const bootstrap = async () => {
 
     await runDB();
 
+    app.set('trust proxy', true);
+
     app.listen(SETTINGS.PORT, () => {
         console.log('...server started in port ' + SETTINGS.PORT);
     });

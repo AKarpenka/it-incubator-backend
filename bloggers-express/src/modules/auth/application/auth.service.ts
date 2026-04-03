@@ -10,9 +10,24 @@ import { SETTINGS } from '../../../core/settings/settings';
 import { WithId } from 'mongodb';
 import { TUser } from '../../../modules/users/types/user';
 import { usersRepository } from '../../../modules/users/repositories/user.repository';
+import { devicesRepository } from '../../../modules/devices/repositories/devices.repository';
+import { TDevice } from '../../../modules/devices/types/device';
+import { v4 as uuid } from 'uuid';
+import { devicesQueryRepository } from '../../../modules/devices/repositories/devices.query-repository';
 
 export const authService = {
-    loginUser: async (loginOrEmail: string, password: string): Promise<Result<{ accessToken: string, refreshToken: string } | null>> => {
+    loginUser: async (props: {
+        loginOrEmail: string, 
+        password: string, 
+        deviceName: string,
+        ip: string,
+    }): Promise<Result<{ accessToken: string, refreshToken: string } | null>> => {
+        const {
+            loginOrEmail, 
+            password, 
+            deviceName,
+            ip,
+        } = props;
         const user = await usersQueryRepository.findByLoginOrEmail(loginOrEmail);
 
         if(!user) {
@@ -35,8 +50,55 @@ export const authService = {
             };
         }
 
+        const userIdStr = user._id.toString();
+        const existingDevice = await devicesQueryRepository.getDeviceByParams({
+            userId: userIdStr,
+            ip,
+            title: deviceName,
+        });
+
         const { accessToken } = jwtService.createAccessToken(user);
-        const { refreshToken } = jwtService.createRefreshToken(user._id.toString());
+
+        if (existingDevice) {
+            const { refreshToken } = jwtService.createRefreshToken(userIdStr, existingDevice.deviceId);
+            const newRTPayload = jwtService.decodePayloadToken<{ exp: number; iat: number }>(refreshToken);
+
+            await devicesRepository.updateDevice({
+                userId: existingDevice.userId,
+                deviceId: existingDevice.deviceId,
+                title: existingDevice.title,
+                ip: existingDevice.ip,
+                lastActiveDate: new Date(newRTPayload.iat * 1000).toISOString(),
+                expRTDate: new Date(newRTPayload.exp * 1000).toISOString(),
+            });
+
+            return {
+                status: Statuses.Success,
+                data: {
+                    accessToken,
+                    refreshToken,
+                },
+                extensions: [],
+            };
+        }
+
+        const newDevice: TDevice = {
+            userId: userIdStr,
+            deviceId: uuid(),
+            lastActiveDate:  new Date().toISOString(),
+            title: deviceName,
+            ip,
+            expRTDate: '',
+        };
+
+        const { refreshToken } = jwtService.createRefreshToken(userIdStr, newDevice.deviceId);
+
+        const expRTDate = jwtService.decodePayloadToken<{exp: number }>(refreshToken).exp;
+
+        await devicesRepository.createNewDevice({
+            ...newDevice,
+            expRTDate: new Date(expRTDate * 1000).toISOString()
+        });
 
         return {
             status: Statuses.Success,
@@ -160,7 +222,7 @@ export const authService = {
         };
     },
 
-    refreshTokens: async (userId: string): Promise<Result<{ accessToken: string, refreshToken: string } | null>> => {
+    refreshTokens: async (userId: string, oldRefreshToken: string): Promise<Result<{ accessToken: string, refreshToken: string } | null>> => {
         const { user } = await usersQueryRepository.getUserById(userId);
 
         if(!user) {
@@ -172,8 +234,36 @@ export const authService = {
             };
         }
 
+        const oldPayload = jwtService.decodePayloadToken<{ deviceId: string }>(oldRefreshToken);
+
+        const device = await devicesQueryRepository.getDeviceByParams({
+            deviceId: oldPayload.deviceId,
+            userId,
+        });
+
+        if(!device) {
+            return {
+                status: Statuses.NotFound,
+                data: null,
+                errorMessage: 'Not Found',
+                extensions: [{ field: 'deviceId', message: 'Device not found for this user' }],
+            };
+        }
+
         const { accessToken } = jwtService.createAccessToken(user);
-        const { refreshToken } = jwtService.createRefreshToken(user._id.toString());
+        const { refreshToken } = jwtService.createRefreshToken(user._id.toString(), device.deviceId);
+
+        const newRTPayload = jwtService.decodePayloadToken<{exp: number, iat: number }>(refreshToken);
+
+        const deviceForUpdate = {
+            ...device,
+            lastActiveDate: new Date(newRTPayload.iat * 1000).toISOString(),
+            expRTDate: new Date(newRTPayload.exp * 1000).toISOString()
+        }
+
+        const updatedDevice = await devicesRepository.updateDevice(deviceForUpdate);
+
+        console.log('updatedDevice', updatedDevice);
 
         return {
             status: Statuses.Success,

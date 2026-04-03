@@ -6,11 +6,19 @@ import { mapToCurrentUserViewModel } from '../mappers/map-to-current-user-view-m
 
 export async function getCurrentUserHandler(req: Request<{}, {}, {}, {}, TUserId>, res: Response) {
     try {
-        const userId = req.user;
-
-        const { user } = await usersQueryRepository.getUserById(userId);
+        const user: TUserId | undefined = req.user;
 
         if(!user) {
+            res
+                .status(HttpStatus.Unauthorized)
+                .json({});
+        
+            return;
+        }
+
+        const userById = await usersQueryRepository.getUserById(user.id.toString());
+
+        if(!userById.user) {
             res
                 .status(HttpStatus.NotFound)
                 .send(`User was not found`);
@@ -18,7 +26,7 @@ export async function getCurrentUserHandler(req: Request<{}, {}, {}, {}, TUserId
             return;
         }
 
-        const currentUser = mapToCurrentUserViewModel(user);
+        const currentUser = mapToCurrentUserViewModel(userById.user);
 
         res                
             .status(HttpStatus.Ok)
