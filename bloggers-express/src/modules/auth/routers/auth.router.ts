@@ -11,12 +11,14 @@ import { refreshTokenMiddleware } from "../../../middlewares/auth/refresh-token.
 import { usersValidatorMiddleware } from "../../../modules/users/routers/middlewares/users-validators.middleware";
 import { registrationConfirmationValidatorMiddleware } from "./middlewares/registration-confirmation-validator.middleware";
 import { registrationEmailResendingValidatorMiddleware } from "./middlewares/registration-email-resending-validator.middleware";
+import { rateLimitMiddleware } from "../../../middlewares/rateLimit/rate-limit.middleware";
 
 export const authRouter = Router();
 
 authRouter
     .post(
         '/login',
+        rateLimitMiddleware,
         ...loginValidatorMiddleware,
         errorsResultMiddleware,
         loginHandler
@@ -30,6 +32,7 @@ authRouter
 
     .post(
         '/registration',
+        rateLimitMiddleware,
         ...usersValidatorMiddleware,
         errorsResultMiddleware,
         registartionHandler 
@@ -37,6 +40,7 @@ authRouter
 
     .post(
         '/registration-confirmation',
+        rateLimitMiddleware,
         ...registrationConfirmationValidatorMiddleware,
         errorsResultMiddleware,
         registrationConfirmationHandler 
@@ -44,6 +48,7 @@ authRouter
     
     .post(
         '/registration-email-resending',
+        rateLimitMiddleware,
         ...registrationEmailResendingValidatorMiddleware,
         errorsResultMiddleware,
         registrationEmailResendingHandler 
