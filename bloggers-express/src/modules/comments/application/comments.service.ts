@@ -2,11 +2,11 @@ import { ObjectId, WithId } from "mongodb";
 import { Result } from "../../../core/types/resultTypes";
 import { TCommentDTO } from "../dto/comment.dto";
 import { TUserId } from "../../../core/types/userId";
-import { usersQueryRepository } from "../../../modules/users/repositories/users.query-repository";
+import { UsersQueryRepository } from "../../../modules/users/repositories/users.query-repository";
 import { Statuses } from "../../../core/types/resultStasuses";
-import { commentsRepository } from "../repositories/comments.repository";
+import { CommentsRepository } from "../repositories/comments.repository";
 import { TComment, TCommentsQueryInput } from "../types/comment";
-import { commentsQueryRepository } from "../repositories/comments.query-repository";
+import { CommentsQueryRepository } from "../repositories/comments.query-repository";
 import { TPost } from "../../../modules/posts/types/post";
 
 type TCreateCommentParams = {
@@ -15,13 +15,23 @@ type TCreateCommentParams = {
     post: WithId<TPost>
 };
 
-export const commentsService = {
-    createComment: async ({
+export class CommentsService {
+    private commentsRepository: CommentsRepository;
+    private commentsQueryRepository: CommentsQueryRepository;
+    private usersQueryRepository: UsersQueryRepository;
+
+    constructor() {
+        this.commentsRepository = new CommentsRepository();
+        this.commentsQueryRepository = new CommentsQueryRepository();
+        this.usersQueryRepository = new UsersQueryRepository();
+    }
+
+    async createComment({
         newCommentDTO,
         userInfo,
         post,
-    }: TCreateCommentParams): Promise<Result<WithId<TComment> | null>> => {
-        const { user } = await usersQueryRepository.getUserById(userInfo.id);
+    }: TCreateCommentParams): Promise<Result<WithId<TComment> | null>> {
+        const { user } = await this.usersQueryRepository.getUserById(userInfo.id);
 
         if(!user) {
             return {
@@ -42,21 +52,21 @@ export const commentsService = {
             postId: post._id,
         }
 
-        const { comment } = await commentsRepository.createComment(newComment);
+        const { comment } = await this.commentsRepository.createComment(newComment);
 
         return {
             status: Statuses.Success,
             data: comment,
             extensions: [],
         };
-    },
+    }
 
-    updateCommentById: async (
+    async updateCommentById (
         id: string, 
         comment: TCommentDTO, 
         user: TUserId
-    ): Promise<Result<WithId<TComment> | null>> => {
-        const { comment: foundComment} = await commentsQueryRepository.getCommentById(id);
+    ): Promise<Result<WithId<TComment> | null>> {
+        const { comment: foundComment} = await this.commentsQueryRepository.getCommentById(id);
 
         if(!foundComment) {
             return {
@@ -76,16 +86,16 @@ export const commentsService = {
             }; 
         }
 
-        const { comment: newComment} = await commentsRepository.updateCommentById(id, comment);
+        const { comment: newComment} = await this.commentsRepository.updateCommentById(id, comment);
 
         return {
             status: Statuses.Success,
             data: newComment,
             extensions: [],
         };
-    },
+    }
 
-    deleteCommentById: async (id: string, user: TUserId): Promise<Result<{ deletedId: string} | null>> => {
+    async deleteCommentById(id: string, user: TUserId): Promise<Result<{ deletedId: string} | null>> {
         if (!ObjectId.isValid(id)) {
             return {
                 status: Statuses.Forbidden,
@@ -95,7 +105,7 @@ export const commentsService = {
             };
         };
 
-        const { comment: foundComment} = await commentsQueryRepository.getCommentById(id);
+        const { comment: foundComment} = await this.commentsQueryRepository.getCommentById(id);
 
         if(!foundComment) {
             return {
@@ -115,7 +125,7 @@ export const commentsService = {
             }; 
         }
 
-        const deletedComment = await commentsRepository.deleteCommentById(id);
+        const deletedComment = await this.commentsRepository.deleteCommentById(id);
 
         if (deletedComment.deletedCount < 1) {
             return {
@@ -131,13 +141,13 @@ export const commentsService = {
             data: null,
             extensions: [],
         };
-    },
+    }
 
-    getCommentsByPostId: async (
+    async getCommentsByPostId(
         queryDto: TCommentsQueryInput,
         postId: string,
-    ): Promise<Result<{ items: WithId<TComment>[]; totalCount: number } | null>> => {
-        const result = await commentsQueryRepository.getCommentsByPostId(queryDto, postId);
+    ): Promise<Result<{ items: WithId<TComment>[]; totalCount: number } | null>> {
+        const result = await this.commentsQueryRepository.getCommentsByPostId(queryDto, postId);
 
         return {
             status: Statuses.Success,

@@ -2,12 +2,13 @@ import { Router } from "express";
 import { paginationAndSortingValidation } from "../../../middlewares/validation/pagination-sorting-validation.middleware";
 import { UsersSortBy } from "../constants";
 import { errorsResultMiddleware } from "../../../middlewares/validation/errors-result.middleware";
-import { createUserHandler, deleteUserHandler, getUsersHandler } from "./handlers";
 import { authorizationMiddleware } from "../../../middlewares/auth/basic-auth-middleware";
 import { usersValidatorMiddleware } from "./middlewares/users-validators.middleware";
 import { idValidation } from "../../../middlewares/validation/id-validators.middleware";
+import { UsersController } from "./controller";
 
 export const usersRouter = Router();
+const usersControllerInstance = new UsersController();
 
 usersRouter
     .get(
@@ -15,7 +16,7 @@ usersRouter
         authorizationMiddleware,
         paginationAndSortingValidation(UsersSortBy),
         errorsResultMiddleware,
-        getUsersHandler
+        usersControllerInstance.getUsersHandler.bind(usersControllerInstance)
     )
 
     .post(
@@ -23,7 +24,7 @@ usersRouter
         authorizationMiddleware,
         ...usersValidatorMiddleware,
         errorsResultMiddleware,
-        createUserHandler
+        usersControllerInstance.createUserHandler.bind(usersControllerInstance)
     )
 
     .delete(
@@ -31,5 +32,5 @@ usersRouter
         authorizationMiddleware,
         idValidation,
         errorsResultMiddleware,
-        deleteUserHandler
+        usersControllerInstance.deleteUserHandler.bind(usersControllerInstance)
     )

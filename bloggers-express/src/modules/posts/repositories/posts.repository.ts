@@ -3,11 +3,11 @@ import { postsCollection } from "../../../db/db";
 import { TPost, TPostQueryInput } from "../types/post";
 import { TPostDTO } from "../application/dto/posts-input.dto";
 
-export const postsRepository = {
-    getPosts: async (
+export class PostsRepository {
+    async getPosts (
         queryDto: TPostQueryInput,
         blogId?: string,
-    ): Promise<{ items: WithId<TPost>[]; totalCount: number }> => {
+    ): Promise<{ items: WithId<TPost>[]; totalCount: number }> {
         const {
             pageNumber,
             pageSize,
@@ -34,27 +34,27 @@ export const postsRepository = {
         const totalCount = await postsCollection.countDocuments(filter);
 
         return { items, totalCount };
-    },
+    }
 
-    getPostById: async (id: string): Promise<WithId<TPost> | null> => {
+    async getPostById (id: string): Promise<WithId<TPost> | null> {
         return await postsCollection.findOne({ _id: new ObjectId(id) });
-    },
+    }
 
-    createPost: async (newPost: TPost): Promise<WithId<TPost> | null> => {
+    async createPost (newPost: TPost): Promise<WithId<TPost> | null> {
         const postWithoutMongoId = await postsCollection.insertOne(newPost);
 
         return {...newPost, _id: postWithoutMongoId.insertedId};
-    },
+    }
 
-    updatePostById: async (id: string, post: TPostDTO): Promise<WithId<TPost> | null> => {
+    async updatePostById (id: string, post: TPostDTO): Promise<WithId<TPost> | null> {
         return await postsCollection.findOneAndUpdate(
             { _id: new ObjectId(id) },
             { $set: { ...post } },
             { returnDocument: 'after' },
         );
-    },
+    }
 
-    deletePostById: async (id: string): Promise<DeleteResult> => {
+    async deletePostById (id: string): Promise<DeleteResult> {
         return await postsCollection.deleteOne({ _id: new ObjectId(id) });
     }
 }

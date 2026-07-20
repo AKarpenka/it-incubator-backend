@@ -1,5 +1,7 @@
 import { body } from "express-validator";
-import { blogsRepository } from "../../../blogs/repositories/blogs.repository";
+import { BlogsRepository } from "../../../blogs/repositories/blogs.repository";
+
+const blogsRepository = new BlogsRepository();
 
 export const postTitleValidator = body('title')
     .isString()

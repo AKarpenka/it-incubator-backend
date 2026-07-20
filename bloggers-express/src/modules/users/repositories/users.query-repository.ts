@@ -2,9 +2,8 @@ import { ObjectId, WithId } from "mongodb";
 import { TUser, TUserQueryInput } from "../types/user";
 import { usersCollection } from "../../../db/db";
 
-
-export const usersQueryRepository = {
-    getUsers: async (queryDto: TUserQueryInput): Promise<{ items: WithId<TUser>[]; totalCount: number }> => {
+export class UsersQueryRepository {
+   async getUsers (queryDto: TUserQueryInput): Promise<{ items: WithId<TUser>[]; totalCount: number }> {
         const {
             pageNumber,
             pageSize,
@@ -43,23 +42,25 @@ export const usersQueryRepository = {
             items,
             totalCount,
         }
-    },
+    }
 
-    checkFieldTaken: async (field: keyof Pick<TUser, 'login' | 'email'>, value: string): Promise<WithId<TUser> | null> => {
+    async checkFieldTaken (field: keyof Pick<TUser, 'login' | 'email'>, value: string): Promise<WithId<TUser> | null> {
         return await usersCollection.findOne({ [field]: value })
-    },
+    }
 
-    getUserById: async (id: string | ObjectId): Promise<{ user: WithId<TUser> | null }> => ({
-        user: await usersCollection.findOne({ _id: new ObjectId(id) })
-    }),
+    async getUserById (id: string | ObjectId): Promise<{ user: WithId<TUser> | null }> {
+        return {
+            user: await usersCollection.findOne({ _id: new ObjectId(id) })
+        }
+    }
 
-    findByLoginOrEmail: async (loginOrEmail: string): Promise<WithId<TUser> | null> => {
+    async findByLoginOrEmail (loginOrEmail: string): Promise<WithId<TUser> | null> {
         return await usersCollection.findOne({
           $or: [{ email: loginOrEmail }, { login: loginOrEmail }],
         });
-    },
+    }
 
-    findUserByConfirmationCode: async (code: string): Promise<{ user: WithId<TUser> | null }> => {
+    async findUserByConfirmationCode (code: string): Promise<{ user: WithId<TUser> | null }> {
         return { user: await usersCollection.findOne({ 'emailConfirmation.confirmationCode': code }) }
     }
 }

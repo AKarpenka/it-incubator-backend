@@ -3,8 +3,10 @@ import { rateLimitCollection } from "../../../db/db";
 import { Filter, WithId } from "mongodb/mongodb";
 import { getTenSecondsAgoFromNow } from "./helpers";
 
-export const rateLimitQueryRepository = {
-    getRequestByIpAndUrl: async(query: Filter<{ip: string; url: string}>): Promise<{requests: WithId<TRateLimit>[], totalCount: number}> => {
+export class RateLimitQueryRepository {
+    async getRequestByIpAndUrl(
+        query: Filter<{ip: string; url: string}>
+    ): Promise<{requests: WithId<TRateLimit>[], totalCount: number}> {
         const filter = {
             ...query,
             date: { $gte: getTenSecondsAgoFromNow() }
@@ -14,5 +16,5 @@ export const rateLimitQueryRepository = {
         const totalCount = await rateLimitCollection.countDocuments(filter);
         
         return { requests, totalCount };
-    },
+    }
 }

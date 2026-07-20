@@ -1,34 +1,54 @@
-import { nodemailerService } from './../../../core/adapters/nodemailer.service';
-import { argon2Service } from '../../../core/adapters/argon2.service';
+import { NodemailerService } from './../../../core/adapters/nodemailer.service';
+import { Argon2Service } from '../../../core/adapters/argon2.service';
 import { Result } from "../../../core/types/resultTypes";
 import { Statuses } from "../../../core/types/resultStasuses";
-import { usersQueryRepository } from "../../../modules/users/repositories/users.query-repository";
-import { jwtService } from '../../../core/adapters/jwt.service';
-import { usersService } from '../../../modules/users/application/users.service';
+import { UsersQueryRepository } from "../../../modules/users/repositories/users.query-repository";
+import { JwtService } from '../../../core/adapters/jwt.service';
+import { UsersService } from '../../../modules/users/application/users.service';
 import { TUserDTO } from '../../../modules/users/repositories/dto/users-input.dto';
 import { SETTINGS } from '../../../core/settings/settings';
 import { WithId } from 'mongodb';
 import { TUser } from '../../../modules/users/types/user';
-import { usersRepository } from '../../../modules/users/repositories/user.repository';
-import { devicesRepository } from '../../../modules/devices/repositories/devices.repository';
+import { UsersRepository } from '../../../modules/users/repositories/user.repository';
+import { DevicesRepository } from '../../../modules/devices/repositories/devices.repository';
 import { TDevice } from '../../../modules/devices/types/device';
 import { v4 as uuid } from 'uuid';
-import { devicesQueryRepository } from '../../../modules/devices/repositories/devices.query-repository';
+import { DevicesQueryRepository } from '../../../modules/devices/repositories/devices.query-repository';
 
-export const authService = {
-    loginUser: async (props: {
+export class AuthService {
+    private jwtService: JwtService;
+    private argon2Service: Argon2Service;
+    private nodemailerService: NodemailerService;
+    private devicesRepository: DevicesRepository;
+    private devicesQueryRepository: DevicesQueryRepository;
+    private usersQueryRepository: UsersQueryRepository;
+    private usersService: UsersService;
+    private usersRepository: UsersRepository;
+
+    constructor() {
+        this.jwtService = new JwtService();
+        this.argon2Service = new Argon2Service();
+        this.nodemailerService = new NodemailerService();
+        this.devicesRepository = new DevicesRepository();
+        this.devicesQueryRepository = new DevicesQueryRepository();
+        this.usersQueryRepository = new UsersQueryRepository();
+        this.usersService = new UsersService();
+        this.usersRepository = new UsersRepository();
+    }
+
+    async loginUser (props: {
         loginOrEmail: string, 
         password: string, 
         deviceName: string,
         ip: string,
-    }): Promise<Result<{ accessToken: string, refreshToken: string } | null>> => {
+    }): Promise<Result<{ accessToken: string, refreshToken: string } | null>> {
         const {
             loginOrEmail, 
             password, 
             deviceName,
             ip,
         } = props;
-        const user = await usersQueryRepository.findByLoginOrEmail(loginOrEmail);
+        const user = await this.usersQueryRepository.findByLoginOrEmail(loginOrEmail);
 
         if(!user) {
             return {
@@ -39,7 +59,7 @@ export const authService = {
             };
         }
 
-        const isPasswordCorrect = await argon2Service.checkPassword(password, user.password);
+        const isPasswordCorrect = await this.argon2Service.checkPassword(password, user.password);
 
         if(!isPasswordCorrect) {
             return {
@@ -51,19 +71,19 @@ export const authService = {
         }
 
         const userIdStr = user._id.toString();
-        const existingDevice = await devicesQueryRepository.getDeviceByParams({
+        const existingDevice = await this.devicesQueryRepository.getDeviceByParams({
             userId: userIdStr,
             ip,
             title: deviceName,
         });
 
-        const { accessToken } = jwtService.createAccessToken(user);
+        const { accessToken } = this.jwtService.createAccessToken(user);
 
         if (existingDevice) {
-            const { refreshToken } = jwtService.createRefreshToken(userIdStr, existingDevice.deviceId);
-            const newRTPayload = jwtService.decodePayloadToken<{ exp: number; iat: number }>(refreshToken);
+            const { refreshToken } = this.jwtService.createRefreshToken(userIdStr, existingDevice.deviceId);
+            const newRTPayload = this.jwtService.decodePayloadToken<{ exp: number; iat: number }>(refreshToken);
 
-            await devicesRepository.updateDevice({
+            await this.devicesRepository.updateDevice({
                 userId: existingDevice.userId,
                 deviceId: existingDevice.deviceId,
                 title: existingDevice.title,
@@ -91,11 +111,11 @@ export const authService = {
             expRTDate: '',
         };
 
-        const { refreshToken } = jwtService.createRefreshToken(userIdStr, newDevice.deviceId);
+        const { refreshToken } = this.jwtService.createRefreshToken(userIdStr, newDevice.deviceId);
 
-        const rtPayload = jwtService.decodePayloadToken<{ exp: number; iat: number }>(refreshToken);
+        const rtPayload = this.jwtService.decodePayloadToken<{ exp: number; iat: number }>(refreshToken);
 
-        await devicesRepository.createNewDevice({
+        await this.devicesRepository.createNewDevice({
             ...newDevice,
             lastActiveDate: new Date(rtPayload.iat * 1000).toISOString(),
             expRTDate: new Date(rtPayload.exp * 1000).toISOString(),
@@ -109,10 +129,10 @@ export const authService = {
             },
             extensions: [],
         };
-    },
+    }
 
-    registrationUser: async (userDto: TUserDTO): Promise<Result<WithId<TUser> | null>> => {
-        const existingUser = await usersQueryRepository.findByLoginOrEmail(userDto.email);
+    async registrationUser (userDto: TUserDTO): Promise<Result<WithId<TUser> | null>> {
+        const existingUser = await this.usersQueryRepository.findByLoginOrEmail(userDto.email);
 
         if(existingUser !== null) {
             return {
@@ -123,7 +143,7 @@ export const authService = {
             };
         }
 
-        const { user: newUser } = await usersService.createUser(userDto);
+        const { user: newUser } = await this.usersService.createUser(userDto);
 
         if(!newUser) {
             return {
@@ -134,17 +154,17 @@ export const authService = {
             };
         }
 
-        sendEmail(newUser);
+        this.sendEmail(newUser);
 
         return {
             status: Statuses.Success,
             data: newUser,
             extensions: [],
         };
-    },
+    }
     
-    registrationConfirmationUser: async (confirmationCode: string): Promise<Result<WithId<TUser> | null>> => {
-        const { user: userByCode } = await usersQueryRepository.findUserByConfirmationCode(confirmationCode);
+    async registrationConfirmationUser (confirmationCode: string): Promise<Result<WithId<TUser> | null>> {
+        const { user: userByCode } = await this.usersQueryRepository.findUserByConfirmationCode(confirmationCode);
 
         if(!userByCode) {
             return {
@@ -173,17 +193,17 @@ export const authService = {
             };
         }
 
-        const { user: confirmedUser } = await usersRepository.confirmUserByConfirmationCode(confirmationCode);
+        const { user: confirmedUser } = await this.usersRepository.confirmUserByConfirmationCode(confirmationCode);
 
         return {
             status: Statuses.Success,
             data: confirmedUser,
             extensions: [],
         };
-    },
+    }
 
-    registrationEmailResending: async (email: string): Promise<Result<WithId<TUser> | null>> => {
-        const existingUser = await usersQueryRepository.findByLoginOrEmail(email);
+    async registrationEmailResending (email: string): Promise<Result<WithId<TUser> | null>> {
+        const existingUser = await this.usersQueryRepository.findByLoginOrEmail(email);
 
         if(!existingUser) {
             return {
@@ -203,7 +223,7 @@ export const authService = {
             };
         }
 
-        const { user: updatedUser } = await usersRepository.updateConfirmationCode(existingUser._id);
+        const { user: updatedUser } = await this.usersRepository.updateConfirmationCode(existingUser._id);
 
         if(!updatedUser) {
             return {
@@ -214,17 +234,20 @@ export const authService = {
             };
         }
 
-        sendEmail(updatedUser);
+        this.sendEmail(updatedUser);
 
         return {
             status: Statuses.Success,
             data: updatedUser,
             extensions: [],
         };
-    },
+    }
 
-    refreshTokens: async (userId: string, oldRefreshToken: string): Promise<Result<{ accessToken: string, refreshToken: string } | null>> => {
-        const { user } = await usersQueryRepository.getUserById(userId);
+    async refreshTokens (
+        userId: string, 
+        oldRefreshToken: string
+    ): Promise<Result<{ accessToken: string, refreshToken: string } | null>> {
+        const { user } = await this.usersQueryRepository.getUserById(userId);
 
         if(!user) {
             return {
@@ -235,9 +258,9 @@ export const authService = {
             };
         }
 
-        const oldPayload = jwtService.decodePayloadToken<{ deviceId: string }>(oldRefreshToken);
+        const oldPayload = this.jwtService.decodePayloadToken<{ deviceId: string }>(oldRefreshToken);
 
-        const device = await devicesQueryRepository.getDeviceByParams({
+        const device = await this.devicesQueryRepository.getDeviceByParams({
             deviceId: oldPayload.deviceId,
             userId,
         });
@@ -251,10 +274,10 @@ export const authService = {
             };
         }
 
-        const { accessToken } = jwtService.createAccessToken(user);
-        const { refreshToken } = jwtService.createRefreshToken(user._id.toString(), device.deviceId);
+        const { accessToken } = this.jwtService.createAccessToken(user);
+        const { refreshToken } = this.jwtService.createRefreshToken(user._id.toString(), device.deviceId);
 
-        const newRTPayload = jwtService.decodePayloadToken<{exp: number, iat: number }>(refreshToken);
+        const newRTPayload = this.jwtService.decodePayloadToken<{exp: number, iat: number }>(refreshToken);
 
         const deviceForUpdate = {
             ...device,
@@ -262,7 +285,7 @@ export const authService = {
             expRTDate: new Date(newRTPayload.exp * 1000).toISOString()
         }
 
-        await devicesRepository.updateDevice(deviceForUpdate);
+        await this.devicesRepository.updateDevice(deviceForUpdate);
 
         return {
             status: Statuses.Success,
@@ -272,21 +295,21 @@ export const authService = {
             },
             extensions: [],
         };
-    },
-}
+    }
 
-function sendEmail (user: WithId<TUser>) {
-    // тут хардкод, который на фронт отправляет рандомную ссылку с кодом подтверждения
-    // и затем фронт еще один пост запрос делает для вызова логики подтверждения 
-    const subject = 'Registration confirm';
-    const message = `
-        <h1>Thank for your registration</h1>
-        <p>To finish registration please follow the link below:
-            <a href='${SETTINGS.PATH.BASE_URL}${SETTINGS.PATH.AUTH}/registration-confirmation?code=${user.emailConfirmation.confirmationCode}'>complete registration</a>
-        </p>
-    `;
+    private sendEmail (user: WithId<TUser>) {
+        // тут хардкод, который на фронт отправляет рандомную ссылку с кодом подтверждения
+        // и затем фронт еще один пост запрос делает для вызова логики подтверждения 
+        const subject = 'Registration confirm';
+        const message = `
+            <h1>Thank for your registration</h1>
+            <p>To finish registration please follow the link below:
+                <a href='${SETTINGS.PATH.BASE_URL}${SETTINGS.PATH.AUTH}/registration-confirmation?code=${user.emailConfirmation.confirmationCode}'>complete registration</a>
+            </p>
+        `;
 
-    nodemailerService
-        .sendEmail(user.email, subject, message)
-        .catch((error: unknown) => console.error('error in send email:', error));
+        this.nodemailerService
+            .sendEmail(user.email, subject, message)
+            .catch((error: unknown) => console.error('error in send email:', error));
+    }
 }

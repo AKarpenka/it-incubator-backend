@@ -1,8 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { HttpStatus } from "../../core/types/httpStatuses";
-import { jwtService } from "../../core/adapters/jwt.service";
+import { JwtService } from "../../core/adapters/jwt.service";
 
 const TYPE_OF_AUTH = `Bearer`;
+
+const jwtService = new JwtService();
 
 export const accessTokenMiddleware = (
     req: Request,

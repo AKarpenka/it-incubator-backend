@@ -1,17 +1,25 @@
 import { WithId } from "mongodb/mongodb";
 import { TDevice } from "../types/device";
-import { devicesQueryRepository } from "../repositories/devices.query-repository";
+import { DevicesQueryRepository } from "../repositories/devices.query-repository";
 import { Statuses } from "../../../core/types/resultStasuses";
 import { Result } from "../../../core/types/resultTypes";
-import { devicesRepository } from "../repositories/devices.repository";
+import { DevicesRepository } from "../repositories/devices.repository";
 
-export const devicesService = {
-    getDevicesByUserId: async (userId: string): Promise<{ devices: WithId<TDevice>[]; totalCount: number }> => {
-        return await devicesQueryRepository.getAllDevicesByUserId(userId);
-    },
+export class DevicesService {
+    private devicesRepository: DevicesRepository;
+    private devicesQueryRepository: DevicesQueryRepository;
 
-    deleteDeviceByDeviceId: async (userId: string, deviceId: string): Promise<Result<{} | null>>  => {
-        const foundDevice = await devicesQueryRepository.getDeviceByParams({deviceId});
+    constructor() {
+        this.devicesRepository = new DevicesRepository();
+        this.devicesQueryRepository = new DevicesQueryRepository();
+    }
+
+    async getDevicesByUserId (userId: string): Promise<{ devices: WithId<TDevice>[]; totalCount: number }> {
+        return await this.devicesQueryRepository.getAllDevicesByUserId(userId);
+    }
+
+    async deleteDeviceByDeviceId (userId: string, deviceId: string): Promise<Result<{} | null>> {
+        const foundDevice = await this.devicesQueryRepository.getDeviceByParams({deviceId});
 
         if(!foundDevice) {
             return {
@@ -31,7 +39,7 @@ export const devicesService = {
             };
         }
 
-        const deletedDevice = await devicesRepository.deleteDeviceByParams({userId, deviceId});
+        const deletedDevice = await this.devicesRepository.deleteDeviceByParams({userId, deviceId});
 
         if (deletedDevice.deletedCount < 1) {
             return {
@@ -47,10 +55,10 @@ export const devicesService = {
             data: {},
             extensions: [],
         };
-    },
+    }
 
-    deleteAllDevices: async (userId: string, deviceId: string): Promise<Result<{} | null>> => {
-        await devicesRepository.deleteAllDevices(userId, deviceId);
+    async deleteAllDevices (userId: string, deviceId: string): Promise<Result<{} | null>> {
+        await this.devicesRepository.deleteAllDevices(userId, deviceId);
 
         return {
             status: Statuses.NoContent,
@@ -58,5 +66,4 @@ export const devicesService = {
             extensions: [],
         };
     }
-
 }

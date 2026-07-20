@@ -3,14 +3,15 @@ import { Router } from "express";
 import { errorsResultMiddleware } from "../../../middlewares/validation/errors-result.middleware";
 import { authorizationMiddleware } from "../../../middlewares/auth/basic-auth-middleware";
 import { postsValidatorMiddleware } from './middlewares/posts-validators.middleware';
-import { createCommentByPostHandler, createPostHandler, deletePostByIdHandler, getCommentsForPostsHandler, getPostByIdHandler, getPostsHandler, updatePostByIdHandler } from './handlers';
 import { paginationAndSortingValidation } from '../../../middlewares/validation/pagination-sorting-validation.middleware';
 import { PostsSortBy } from '../constants';
 import { commentsByPostsValidatorMiddleware } from './middlewares/comments-by-posts-validators.middleware';
 import { accessTokenMiddleware } from '../../../middlewares/auth/access-token.middleware';
 import { CommentsSortBy } from '../../../modules/comments/constants';
+import { PostsController } from './controller';
 
 export const postsRouter = Router();
+const postsControllerInstance = new PostsController();
 
 postsRouter
     .get(
@@ -18,21 +19,21 @@ postsRouter
         idValidation,
         paginationAndSortingValidation(CommentsSortBy),
         errorsResultMiddleware,
-        getCommentsForPostsHandler
+        postsControllerInstance.getCommentsForPostsHandler.bind(postsControllerInstance)
     )
-    .get('/:id', idValidation, errorsResultMiddleware, getPostByIdHandler)
+    .get('/:id', idValidation, errorsResultMiddleware, postsControllerInstance.getPostByIdHandler.bind(postsControllerInstance))
     .get(
         '/', 
         paginationAndSortingValidation(PostsSortBy),
         errorsResultMiddleware,
-        getPostsHandler
+        postsControllerInstance.getPostsHandler.bind(postsControllerInstance)
     )
 
     .delete('/:id', 
         authorizationMiddleware, 
         idValidation,
         errorsResultMiddleware,
-        deletePostByIdHandler
+        postsControllerInstance.deletePostByIdHandler.bind(postsControllerInstance)
     )
 
     .post('/:id/comments', 
@@ -40,13 +41,13 @@ postsRouter
         idValidation,
         ...commentsByPostsValidatorMiddleware,
         errorsResultMiddleware,
-        createCommentByPostHandler
+        postsControllerInstance.createCommentByPostHandler.bind(postsControllerInstance)
     )
     .post('/', 
         authorizationMiddleware, 
         ...postsValidatorMiddleware,
         errorsResultMiddleware,
-        createPostHandler
+        postsControllerInstance.createPostHandler.bind(postsControllerInstance)
     )
 
     .put('/:id', 
@@ -54,5 +55,5 @@ postsRouter
         idValidation,
         ...postsValidatorMiddleware,
         errorsResultMiddleware,
-        updatePostByIdHandler
+        postsControllerInstance.updatePostByIdHandler.bind(postsControllerInstance)
     );

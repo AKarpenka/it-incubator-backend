@@ -5,7 +5,8 @@
 import { Router } from "express";
 import { errorsResultMiddleware } from "../../../middlewares/validation/errors-result.middleware";
 import { loginValidatorMiddleware } from "./middlewares/login-validators.middleware";
-import { getCurrentUserHandler, loginHandler, registartionHandler, registrationConfirmationHandler, registrationEmailResendingHandler, refreshTokenHandler, logoutHandler } from "./handlers";
+// import { getCurrentUserHandler, loginHandler, registartionHandler, registrationConfirmationHandler, registrationEmailResendingHandler, refreshTokenHandler, logoutHandler } from "./handlers";
+import { AuthController } from "./controller";
 import { accessTokenMiddleware } from "../../../middlewares/auth/access-token.middleware";
 import { refreshTokenMiddleware } from "../../../middlewares/auth/refresh-token.middleware";
 import { usersValidatorMiddleware } from "../../../modules/users/routers/middlewares/users-validators.middleware";
@@ -14,6 +15,7 @@ import { registrationEmailResendingValidatorMiddleware } from "./middlewares/reg
 import { rateLimitMiddleware } from "../../../middlewares/rateLimit/rate-limit.middleware";
 
 export const authRouter = Router();
+const authControllerInstance = new AuthController();
 
 authRouter
     .post(
@@ -21,13 +23,13 @@ authRouter
         rateLimitMiddleware,
         ...loginValidatorMiddleware,
         errorsResultMiddleware,
-        loginHandler
+        authControllerInstance.loginHandler.bind(authControllerInstance)
     )
 
     .post(
         '/refresh-token',
         refreshTokenMiddleware,
-        refreshTokenHandler
+        authControllerInstance.refreshTokenHandler.bind(authControllerInstance)
     )
 
     .post(
@@ -35,7 +37,7 @@ authRouter
         rateLimitMiddleware,
         ...usersValidatorMiddleware,
         errorsResultMiddleware,
-        registartionHandler 
+        authControllerInstance.registartionHandler.bind(authControllerInstance) 
     )
 
     .post(
@@ -43,7 +45,7 @@ authRouter
         rateLimitMiddleware,
         ...registrationConfirmationValidatorMiddleware,
         errorsResultMiddleware,
-        registrationConfirmationHandler 
+        authControllerInstance.registrationConfirmationHandler.bind(authControllerInstance) 
     )
     
     .post(
@@ -51,17 +53,17 @@ authRouter
         rateLimitMiddleware,
         ...registrationEmailResendingValidatorMiddleware,
         errorsResultMiddleware,
-        registrationEmailResendingHandler 
+        authControllerInstance.registrationEmailResendingHandler.bind(authControllerInstance) 
     )
 
     .post(
         '/logout',
         refreshTokenMiddleware,
-        logoutHandler 
+        authControllerInstance.logoutHandler.bind(authControllerInstance) 
     )
 
     .get(
         '/me',
         accessTokenMiddleware,
-        getCurrentUserHandler
+        authControllerInstance.getCurrentUserHandler.bind(authControllerInstance)
     )

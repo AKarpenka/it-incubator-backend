@@ -23,7 +23,7 @@ export let usersCollection: Collection<TUser>;
 export let commentsCollection: Collection<TComment>;
 export let devicesCollection: Collection<TDevice>;
 export let rateLimitCollection: Collection<TRateLimit>;
-
+// ???
 export const runDB = async () => {
     if(!MONGO_URL) {
         console.error('MONGO_URL doesnt found');
