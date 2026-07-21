@@ -14,27 +14,20 @@ import { DevicesRepository } from '../../../modules/devices/repositories/devices
 import { TDevice } from '../../../modules/devices/types/device';
 import { v4 as uuid } from 'uuid';
 import { DevicesQueryRepository } from '../../../modules/devices/repositories/devices.query-repository';
+import { inject, injectable } from 'inversify';
 
+@injectable()
 export class AuthService {
-    private jwtService: JwtService;
-    private argon2Service: Argon2Service;
-    private nodemailerService: NodemailerService;
-    private devicesRepository: DevicesRepository;
-    private devicesQueryRepository: DevicesQueryRepository;
-    private usersQueryRepository: UsersQueryRepository;
-    private usersService: UsersService;
-    private usersRepository: UsersRepository;
-
-    constructor() {
-        this.jwtService = new JwtService();
-        this.argon2Service = new Argon2Service();
-        this.nodemailerService = new NodemailerService();
-        this.devicesRepository = new DevicesRepository();
-        this.devicesQueryRepository = new DevicesQueryRepository();
-        this.usersQueryRepository = new UsersQueryRepository();
-        this.usersService = new UsersService();
-        this.usersRepository = new UsersRepository();
-    }
+    constructor(
+        @inject(JwtService) protected jwtService: JwtService,
+        @inject(Argon2Service) protected argon2Service: Argon2Service,
+        @inject(NodemailerService) protected nodemailerService: NodemailerService,
+        @inject(DevicesRepository) protected devicesRepository: DevicesRepository,
+        @inject(DevicesQueryRepository) protected devicesQueryRepository: DevicesQueryRepository,
+        @inject(UsersQueryRepository) protected usersQueryRepository: UsersQueryRepository,
+        @inject(UsersService) protected usersService: UsersService,
+        @inject(UsersRepository) protected usersRepository: UsersRepository,
+    ) {}
 
     async loginUser (props: {
         loginOrEmail: string, 

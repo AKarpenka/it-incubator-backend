@@ -2,16 +2,16 @@ import { NextFunction, Request, Response } from "express";
 import { HttpStatus } from "../../core/types/httpStatuses";
 import { JwtService } from "../../core/adapters/jwt.service";
 import { DevicesQueryRepository } from "../../modules/devices/repositories/devices.query-repository";
+import { container } from "../../modules/composition-root";
 
 function refreshTokenIatMatchesDevice(lastActiveDate: string, tokenIatSec: number): boolean {
     const deviceIatSec = Math.floor(Date.parse(lastActiveDate) / 1000);
     return deviceIatSec === tokenIatSec;
 }
 
-const devicesQueryRepository = new DevicesQueryRepository();
-const jwtService = new JwtService();
+const devicesQueryRepository = container.get(DevicesQueryRepository)
+const jwtService = container.get(JwtService);
 
-// ???
 export const refreshTokenMiddleware = async (
     req: Request,
     res: Response, 

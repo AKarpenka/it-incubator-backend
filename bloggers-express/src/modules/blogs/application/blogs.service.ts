@@ -2,9 +2,13 @@ import { ObjectId, WithId } from "mongodb";
 import { BlogsRepository } from "../repositories/blogs.repository";
 import { TBlog, TBlogQueryInput } from "../types/blog";
 import { TBlogDTO } from "./dto/blogs-input.dto";
+import { inject, injectable } from 'inversify';
 
+@injectable()
 export class BlogsService {
-    constructor(protected blogsRepository: BlogsRepository) {}
+    constructor(
+        @inject(BlogsRepository) protected blogsRepository: BlogsRepository
+    ) {}
 
     async getBlogs(queryDto: TBlogQueryInput): Promise<{ items: WithId<TBlog>[]; totalCount: number }> {
         return await this.blogsRepository.getBlogs(queryDto);

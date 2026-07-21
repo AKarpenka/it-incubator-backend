@@ -8,10 +8,14 @@ import { paginationAndSortingValidation } from "../../../middlewares/validation/
 import { BlogsSortBy } from "../constants";
 import { postsByBlogValidatorMiddleware } from "./middlewares/posts-by-blog-validators.middleware";
 import { PostsSortBy } from "../../posts/constants";
-import { ioc } from "./composition-root";
+import { container } from "../../composition-root";
 
 export const blogsRouter = Router();
-const blogsControllerInstance = ioc.getInstance<BlogsController>(BlogsController)
+
+/* INFO: Пример применения собсвенного ioc контейнера для DI */
+// const blogsControllerInstance = ioc.getInstance<BlogsController>(BlogsController)
+
+const blogsControllerInstance = container.get(BlogsController);
 
 blogsRouter
     .get(

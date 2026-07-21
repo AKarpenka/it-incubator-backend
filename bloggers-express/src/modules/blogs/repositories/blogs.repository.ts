@@ -2,7 +2,9 @@ import { DeleteResult, ObjectId, WithId } from "mongodb";
 import { blogsCollection } from "../../../db/db";
 import { TBlog, TBlogQueryInput } from "../types/blog";
 import { TBlogDTO } from "../application/dto/blogs-input.dto";
+import { injectable } from 'inversify';
 
+@injectable()
 export class BlogsRepository {
     async getBlogs (queryDto: TBlogQueryInput): Promise<{ items: WithId<TBlog>[]; totalCount: number }> {
         const {

@@ -4,15 +4,14 @@ import { CommentsQueryRepository } from '../../repositories/comments.query-repos
 import { mapToCommentsViewModel } from '../mappers/map-to-comments-view-model';
 import { CommentsService } from '../../application/comments.service';
 import { Statuses } from '../../../../core/types/resultStasuses';
+import { inject, injectable } from 'inversify';
 
+@injectable()
 export class CommentsController {
-    private commentsQueryRepository: CommentsQueryRepository;
-    private commentsService: CommentsService;
-
-    constructor() {
-        this.commentsQueryRepository = new CommentsQueryRepository();
-        this.commentsService = new CommentsService();
-    }
+    constructor(
+        @inject(CommentsQueryRepository) protected commentsQueryRepository: CommentsQueryRepository,
+        @inject(CommentsService) protected commentsService: CommentsService,
+    ) {}
 
     async getCommentsByIdHandler(req: Request, res: Response) {
         try {

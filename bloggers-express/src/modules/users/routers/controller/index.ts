@@ -7,15 +7,14 @@ import { TUserQueryInput } from '../../types/user';
 import { setDefaultSortAndPaginationIfNotExist } from '../../../../core/helpers/set-default-sort-and-pagination';
 import { UsersQueryRepository } from '../../repositories/users.query-repository';
 import { mapToUsersViewModelPaginated } from '../mappers/map-to-users-view-model-paginated.util';
+import { inject, injectable } from 'inversify';
 
+@injectable()
 export class UsersController {
-    private usersService: UsersService;
-    private usersQueryRepository: UsersQueryRepository;
-
-    constructor() {
-        this.usersService = new UsersService();
-        this.usersQueryRepository = new UsersQueryRepository();
-    }
+    constructor(
+        @inject(UsersService) protected usersService: UsersService,
+        @inject(UsersQueryRepository) protected usersQueryRepository: UsersQueryRepository,
+    ) {}
 
     async createUserHandler(req: Request<{}, {}, TUserDTO>, res: Response) {
         try {

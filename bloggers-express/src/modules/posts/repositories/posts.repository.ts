@@ -2,7 +2,9 @@ import { DeleteResult, ObjectId, WithId } from "mongodb";
 import { postsCollection } from "../../../db/db";
 import { TPost, TPostQueryInput } from "../types/post";
 import { TPostDTO } from "../application/dto/posts-input.dto";
+import { injectable } from "inversify";
 
+@injectable()
 export class PostsRepository {
     async getPosts (
         queryDto: TPostQueryInput,

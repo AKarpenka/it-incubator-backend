@@ -8,6 +8,7 @@ import { CommentsRepository } from "../repositories/comments.repository";
 import { TComment, TCommentsQueryInput } from "../types/comment";
 import { CommentsQueryRepository } from "../repositories/comments.query-repository";
 import { TPost } from "../../../modules/posts/types/post";
+import { injectable } from "inversify";
 
 type TCreateCommentParams = {
     newCommentDTO: TCommentDTO,
@@ -15,16 +16,13 @@ type TCreateCommentParams = {
     post: WithId<TPost>
 };
 
+@injectable()
 export class CommentsService {
-    private commentsRepository: CommentsRepository;
-    private commentsQueryRepository: CommentsQueryRepository;
-    private usersQueryRepository: UsersQueryRepository;
-
-    constructor() {
-        this.commentsRepository = new CommentsRepository();
-        this.commentsQueryRepository = new CommentsQueryRepository();
-        this.usersQueryRepository = new UsersQueryRepository();
-    }
+    constructor(
+        protected commentsRepository: CommentsRepository,
+        protected commentsQueryRepository: CommentsQueryRepository,
+        protected usersQueryRepository: UsersQueryRepository,
+    ) {}
 
     async createComment({
         newCommentDTO,

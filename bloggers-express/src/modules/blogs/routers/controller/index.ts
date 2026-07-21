@@ -11,9 +11,14 @@ import { mapToBlogsViewModelPaginated } from '../mappers/map-to-blogs-view-model
 import { TPostQueryInput } from '../../../posts/types/post';
 import { mapToPostsViewModelPaginated } from '../../../posts/routers/mapper/map-to-posts-view-model-paginated.utils';
 import { PostsService } from '../../../posts/application/posts.service';
+import { inject, injectable } from 'inversify';
 
+@injectable()
 export class BlogsController {
-    constructor(protected blogsService: BlogsService, protected postsService: PostsService) {}
+    constructor(
+        @inject(BlogsService) protected blogsService: BlogsService, 
+        @inject(PostsService) protected postsService: PostsService
+    ) {}
 
     async createBlogHandler(req: Request<{}, {}, TBlogDTO>, res: Response) {
         try {

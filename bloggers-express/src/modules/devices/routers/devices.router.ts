@@ -3,9 +3,10 @@ import { refreshTokenMiddleware } from "../../../middlewares/auth/refresh-token.
 import { deviceIdValidation } from "./middlewares/id-validators.middleware";
 import { errorsResultMiddleware } from "../../../middlewares/validation/errors-result.middleware";
 import { DevicesController } from "./controller";
+import { container } from "../../composition-root";
 
 export const devicesRouter = Router();
-const devicesControllerInstance = new DevicesController();
+const devicesControllerInstance = container.get(DevicesController);
 
 devicesRouter
     .get(

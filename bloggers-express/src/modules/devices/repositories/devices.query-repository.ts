@@ -1,7 +1,9 @@
+import { injectable } from "inversify";
 import { devicesCollection } from "../../../db/db";
 import { TDevice } from "../types/device";
 import { Filter, WithId } from "mongodb/mongodb";
 
+@injectable()
 export class DevicesQueryRepository {
     async getDeviceByParams (filter: Filter<TDevice>): Promise<WithId<TDevice> | null> {
         return await devicesCollection

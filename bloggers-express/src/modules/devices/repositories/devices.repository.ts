@@ -1,7 +1,9 @@
 import { DeleteResult, Filter, ObjectId, WithId } from "mongodb/mongodb";
 import { TDevice } from "../types/device";
 import { devicesCollection } from "../../../db/db";
+import { injectable } from "inversify";
 
+@injectable()
 export class DevicesRepository {
     async createNewDevice (newDevice: TDevice): Promise<{ insertedId: ObjectId }> {
         return {

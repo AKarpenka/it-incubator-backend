@@ -3,7 +3,9 @@ import { DeleteResult, ModifyResult, ObjectId, WithId } from "mongodb";
 import { TUser } from "../types/user";
 import { v4 as uuid } from "uuid";
 import { add } from "date-fns";
+import { injectable } from "inversify";
 
+@injectable()
 export class UsersRepository {
     async createUser (newUser: TUser): Promise<{ insertedId: ObjectId }> {
             return {

@@ -4,10 +4,11 @@ import { idValidation } from "../../../middlewares/validation/id-validators.midd
 import { accessTokenMiddleware } from "../../../middlewares/auth/access-token.middleware";
 import { commentsValidatorMiddleware } from "../middlewares/comments-validator.middleware";
 import { CommentsController } from "./controller";
+import { container } from "../../composition-root";
 
 
 export const commentsRouter = Router();
-const commensControllerInstance = new CommentsController();
+const commensControllerInstance = container.get(CommentsController);
 
 commentsRouter
     .get(

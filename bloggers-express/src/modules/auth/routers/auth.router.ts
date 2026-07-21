@@ -1,11 +1,9 @@
 /**
  * Аутентификация с токеном для работы с данными users (login, logout)
  */
-
 import { Router } from "express";
 import { errorsResultMiddleware } from "../../../middlewares/validation/errors-result.middleware";
 import { loginValidatorMiddleware } from "./middlewares/login-validators.middleware";
-// import { getCurrentUserHandler, loginHandler, registartionHandler, registrationConfirmationHandler, registrationEmailResendingHandler, refreshTokenHandler, logoutHandler } from "./handlers";
 import { AuthController } from "./controller";
 import { accessTokenMiddleware } from "../../../middlewares/auth/access-token.middleware";
 import { refreshTokenMiddleware } from "../../../middlewares/auth/refresh-token.middleware";
@@ -13,9 +11,10 @@ import { usersValidatorMiddleware } from "../../../modules/users/routers/middlew
 import { registrationConfirmationValidatorMiddleware } from "./middlewares/registration-confirmation-validator.middleware";
 import { registrationEmailResendingValidatorMiddleware } from "./middlewares/registration-email-resending-validator.middleware";
 import { rateLimitMiddleware } from "../../../middlewares/rateLimit/rate-limit.middleware";
+import { container } from "../../composition-root";
 
 export const authRouter = Router();
-const authControllerInstance = new AuthController();
+const authControllerInstance = container.get(AuthController);
 
 authRouter
     .post(

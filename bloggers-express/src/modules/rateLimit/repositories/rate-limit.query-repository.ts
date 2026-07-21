@@ -2,7 +2,9 @@ import { TRateLimit } from "../../../middlewares/rateLimit/types";
 import { rateLimitCollection } from "../../../db/db";
 import { Filter, WithId } from "mongodb/mongodb";
 import { getTenSecondsAgoFromNow } from "./helpers";
+import { injectable } from "inversify";
 
+@injectable()
 export class RateLimitQueryRepository {
     async getRequestByIpAndUrl(
         query: Filter<{ip: string; url: string}>

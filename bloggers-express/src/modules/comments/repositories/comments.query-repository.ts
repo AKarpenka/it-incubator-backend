@@ -1,7 +1,9 @@
 import {  ObjectId, WithId } from "mongodb";
 import { TComment, TCommentsQueryInput } from "../types/comment";
 import { commentsCollection } from "../../../db/db";
+import { injectable } from "inversify";
 
+@injectable()
 export class CommentsQueryRepository {
     async getCommentById (id: string): Promise<{ comment: WithId<TComment> | null}> {
         if (!ObjectId.isValid(id)) {

@@ -5,15 +5,14 @@ import { JwtService } from '../../../../core/adapters/jwt.service';
 import { DevicesService } from '../../application/devices.service';
 import { Statuses } from '../../../../core/types/resultStasuses';
 import { mapToDevicesViewModel } from '../mappers/map-to-devices-view-model.utils';
+import { inject, injectable } from 'inversify';
 
+@injectable()
 export class DevicesController {
-    private jwtService: JwtService;
-    private devicesService: DevicesService;
-
-    constructor() {
-        this.jwtService = new JwtService();
-        this.devicesService = new DevicesService();
-    }
+    constructor(
+        @inject(JwtService) protected jwtService: JwtService,
+        @inject(DevicesService) protected devicesService: DevicesService,
+    ) {}
 
     async deleteAllDevicesHandler(req: Request<{}, {}, {}, {}, TUserId>, res: Response) {
         try {

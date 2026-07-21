@@ -6,17 +6,15 @@ import { UsersRepository } from "../repositories/user.repository";
 import { Argon2Service } from "../../../core/adapters/argon2.service";
 import { v4 as uuid } from 'uuid';
 import { add } from "date-fns";
+import { inject, injectable } from "inversify";
 
+@injectable()
 export class UsersService {
-    private argon2Service: Argon2Service;
-    private usersRepository: UsersRepository;
-    private usersQueryRepository: UsersQueryRepository;
-
-    constructor() {
-        this.argon2Service = new Argon2Service();
-        this.usersRepository = new UsersRepository();
-        this.usersQueryRepository = new UsersQueryRepository();
-    }
+    constructor(
+        @inject(Argon2Service) protected argon2Service: Argon2Service,
+        @inject(UsersRepository) protected usersRepository: UsersRepository,
+        @inject(UsersQueryRepository) protected usersQueryRepository: UsersQueryRepository,
+    ) {}
 
     async createUser (inputUser: TUserDTO, isConfirmed?: boolean): Promise<{ user: WithId<TUser> | null }> {
         const passwordHash = await this.argon2Service.generateHash(inputUser.password);

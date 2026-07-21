@@ -7,19 +7,16 @@ import { AuthService } from '../../application/auth.service';
 import { Statuses } from '../../../../core/types/resultStasuses';
 import { JwtService } from '../../../../core/adapters/jwt.service';
 import { DevicesService } from '../../../devices/application/devices.service';
+import { inject, injectable } from 'inversify';
 
+@injectable()
 export class AuthController {
-    private authService: AuthService;
-    private jwtService: JwtService;
-    private devicesService: DevicesService;
-    private usersQueryRepository: UsersQueryRepository;
-
-    constructor() {
-        this.authService = new AuthService();
-        this.jwtService = new JwtService();
-        this.devicesService = new DevicesService();
-        this.usersQueryRepository = new UsersQueryRepository();
-    }
+    constructor(
+        @inject(AuthService) protected authService: AuthService,
+        @inject(JwtService) protected jwtService: JwtService,
+        @inject(DevicesService) protected devicesService: DevicesService,
+        @inject(UsersQueryRepository) protected usersQueryRepository: UsersQueryRepository,
+    ) {}
 
     async getCurrentUserHandler(req: Request<{}, {}, {}, {}, TUserId>, res: Response) {
         try {

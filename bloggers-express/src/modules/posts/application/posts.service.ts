@@ -4,9 +4,14 @@ import { TPost, TPostQueryInput } from "../types/post";
 import {  TPostDTO } from "./dto/posts-input.dto";
 import { BlogsRepository } from "../../../modules/blogs/repositories/blogs.repository";
 import { TBlog } from "../../../modules/blogs/types/blog";
+import { inject, injectable } from "inversify";
 
+@injectable()
 export class PostsService {
-    constructor(protected blogsRepository: BlogsRepository, protected postsRepository: PostsRepository) {}
+    constructor(
+        @inject(BlogsRepository) protected blogsRepository: BlogsRepository, 
+        @inject(PostsRepository) protected postsRepository: PostsRepository
+    ) {}
 
     async getPosts (queryDto: TPostQueryInput): Promise<{ items: WithId<TPost>[]; totalCount: number }> {
         return await this.postsRepository.getPosts(queryDto);

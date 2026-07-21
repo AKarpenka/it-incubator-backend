@@ -11,15 +11,14 @@ import { CommentsSortBy } from '../../../comments/constants';
 import { mapToCommentsViewModelPaginated } from '../../../comments/routers/mappers/map-to-posts-view-model-paginated.utils';
 import { TPostQueryInput } from '../../types/post';
 import { mapToPostsViewModelPaginated } from '../mapper/map-to-posts-view-model-paginated.utils';
+import { inject, injectable } from 'inversify';
 
+@injectable()
 export class PostsController {
-    private postsService: PostsService;
-    private commentsService: CommentsService;
-
-    constructor() {
-        this.postsService = new PostsService();
-        this.commentsService = new CommentsService();
-    }
+    constructor(
+        @inject(PostsService) protected postsService: PostsService,
+        @inject(CommentsService) protected commentsService: CommentsService,
+    ) {}
 
     async createCommentByPostHandler(req: Request, res: Response) {
         try {

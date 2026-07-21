@@ -6,9 +6,10 @@ import { authorizationMiddleware } from "../../../middlewares/auth/basic-auth-mi
 import { usersValidatorMiddleware } from "./middlewares/users-validators.middleware";
 import { idValidation } from "../../../middlewares/validation/id-validators.middleware";
 import { UsersController } from "./controller";
+import { container } from "../../composition-root";
 
 export const usersRouter = Router();
-const usersControllerInstance = new UsersController();
+const usersControllerInstance = container.get(UsersController);
 
 usersRouter
     .get(

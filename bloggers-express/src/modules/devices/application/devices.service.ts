@@ -4,15 +4,14 @@ import { DevicesQueryRepository } from "../repositories/devices.query-repository
 import { Statuses } from "../../../core/types/resultStasuses";
 import { Result } from "../../../core/types/resultTypes";
 import { DevicesRepository } from "../repositories/devices.repository";
+import { inject, injectable } from "inversify";
 
+@injectable()
 export class DevicesService {
-    private devicesRepository: DevicesRepository;
-    private devicesQueryRepository: DevicesQueryRepository;
-
-    constructor() {
-        this.devicesRepository = new DevicesRepository();
-        this.devicesQueryRepository = new DevicesQueryRepository();
-    }
+    constructor(
+        @inject(DevicesRepository) protected devicesRepository: DevicesRepository,
+        @inject(DevicesQueryRepository) protected devicesQueryRepository: DevicesQueryRepository,
+    ) {}
 
     async getDevicesByUserId (userId: string): Promise<{ devices: WithId<TDevice>[]; totalCount: number }> {
         return await this.devicesQueryRepository.getAllDevicesByUserId(userId);

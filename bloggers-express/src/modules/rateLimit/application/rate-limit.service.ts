@@ -4,15 +4,14 @@ import { TRateLimit } from "../../../middlewares/rateLimit/types";
 import { RateLimitQueryRepository } from "../repositories/rate-limit.query-repository";
 import { Statuses } from "../../../core/types/resultStasuses";
 import { RateLimitRepository } from "../repositories/rate-limit.repository";
+import { inject, injectable } from "inversify";
 
+@injectable()
 export class RateLimitService {
-    private rateLimitQueryRepository: RateLimitQueryRepository;
-    private rateLimitRepository: RateLimitRepository;
-
-    constructor() {
-        this.rateLimitQueryRepository = new RateLimitQueryRepository();
-        this.rateLimitRepository = new RateLimitRepository();
-    }
+    constructor(
+        @inject(RateLimitQueryRepository) protected rateLimitQueryRepository: RateLimitQueryRepository,
+        @inject(RateLimitRepository) protected rateLimitRepository: RateLimitRepository,
+    ) {}
 
     async getRequestByIpAndUrl (
         ip: string, 

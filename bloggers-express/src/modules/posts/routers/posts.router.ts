@@ -9,9 +9,10 @@ import { commentsByPostsValidatorMiddleware } from './middlewares/comments-by-po
 import { accessTokenMiddleware } from '../../../middlewares/auth/access-token.middleware';
 import { CommentsSortBy } from '../../../modules/comments/constants';
 import { PostsController } from './controller';
+import { container } from '../../composition-root';
 
 export const postsRouter = Router();
-const postsControllerInstance = new PostsController();
+const postsControllerInstance = container.get(PostsController);
 
 postsRouter
     .get(

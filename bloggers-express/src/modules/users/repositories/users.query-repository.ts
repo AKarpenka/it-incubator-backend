@@ -1,7 +1,9 @@
 import { ObjectId, WithId } from "mongodb";
 import { TUser, TUserQueryInput } from "../types/user";
 import { usersCollection } from "../../../db/db";
+import { injectable } from "inversify";
 
+@injectable()
 export class UsersQueryRepository {
    async getUsers (queryDto: TUserQueryInput): Promise<{ items: WithId<TUser>[]; totalCount: number }> {
         const {
