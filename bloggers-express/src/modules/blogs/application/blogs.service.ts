@@ -4,11 +4,7 @@ import { TBlog, TBlogQueryInput } from "../types/blog";
 import { TBlogDTO } from "./dto/blogs-input.dto";
 
 export class BlogsService {
-    private blogsRepository: BlogsRepository;
-
-    constructor() {
-        this.blogsRepository = new BlogsRepository();
-    }
+    constructor(protected blogsRepository: BlogsRepository) {}
 
     async getBlogs(queryDto: TBlogQueryInput): Promise<{ items: WithId<TBlog>[]; totalCount: number }> {
         return await this.blogsRepository.getBlogs(queryDto);

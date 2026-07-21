@@ -13,13 +13,7 @@ import { mapToPostsViewModelPaginated } from '../../../posts/routers/mapper/map-
 import { PostsService } from '../../../posts/application/posts.service';
 
 export class BlogsController {
-    private blogsService: BlogsService;
-    private postsService: PostsService;
-
-    constructor() {
-        this.blogsService = new BlogsService();
-        this.postsService = new PostsService();
-    }
+    constructor(protected blogsService: BlogsService, protected postsService: PostsService) {}
 
     async createBlogHandler(req: Request<{}, {}, TBlogDTO>, res: Response) {
         try {

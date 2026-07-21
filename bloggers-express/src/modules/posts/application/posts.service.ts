@@ -6,13 +6,7 @@ import { BlogsRepository } from "../../../modules/blogs/repositories/blogs.repos
 import { TBlog } from "../../../modules/blogs/types/blog";
 
 export class PostsService {
-    private blogsRepository: BlogsRepository;
-    private postsRepository: PostsRepository;
-
-    constructor() {
-        this.blogsRepository = new BlogsRepository();
-        this.postsRepository = new PostsRepository();
-    }
+    constructor(protected blogsRepository: BlogsRepository, protected postsRepository: PostsRepository) {}
 
     async getPosts (queryDto: TPostQueryInput): Promise<{ items: WithId<TPost>[]; totalCount: number }> {
         return await this.postsRepository.getPosts(queryDto);

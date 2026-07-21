@@ -8,9 +8,10 @@ import { paginationAndSortingValidation } from "../../../middlewares/validation/
 import { BlogsSortBy } from "../constants";
 import { postsByBlogValidatorMiddleware } from "./middlewares/posts-by-blog-validators.middleware";
 import { PostsSortBy } from "../../posts/constants";
+import { ioc } from "./composition-root";
 
 export const blogsRouter = Router();
-const blogsControllerInstance = new BlogsController();
+const blogsControllerInstance = ioc.getInstance<BlogsController>(BlogsController)
 
 blogsRouter
     .get(
