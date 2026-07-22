@@ -48,7 +48,7 @@ export class UsersRepository {
             { 
                 $set: { 
                     'passwordRecovery.recoveryCode': uuid(),
-                    'passwordRecovery.expirationDate': add(new Date(), { minutes: 1 })
+                    'passwordRecovery.expirationDate': add(new Date(), { hours: 1 })
                 } 
             },
             { returnDocument: 'after' },
