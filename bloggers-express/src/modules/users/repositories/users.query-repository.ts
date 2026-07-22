@@ -65,4 +65,8 @@ export class UsersQueryRepository {
     async findUserByConfirmationCode (code: string): Promise<{ user: WithId<TUser> | null }> {
         return { user: await usersCollection.findOne({ 'emailConfirmation.confirmationCode': code }) }
     }
+
+    async findUserByRecoveryCode (code: string): Promise<{ user: WithId<TUser> | null }> {
+        return { user: await usersCollection.findOne({ 'passwordRecovery.recoveryCode': code }) }
+    }
 }

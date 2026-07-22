@@ -208,4 +208,52 @@ export class AuthController {
             res.sendStatus(HttpStatus.InternalServerError);
         }
     }
+
+    async passwordRecoveryHandler(req: Request, res: Response) {
+        try {
+            const result = await this.authService.passwordRecovery(req.body.email);
+
+            if (result.status !== Statuses.Success) {
+                console.error('Error:', result);
+    
+                res
+                    .status(HttpStatus.BadRequest)
+                    .json({ errorsMessages: result.extensions });
+    
+                return;
+            }
+    
+            res.sendStatus(HttpStatus.NoContent);
+    
+            return;
+                
+        } catch (e: unknown) {
+            res.sendStatus(HttpStatus.InternalServerError);
+        }
+    }
+
+    async newPasswordHandler(req: Request, res: Response) {
+        try {
+            const { newPassword, recoveryCode } = req.body;
+
+            const result = await this.authService.updateUserPassword(newPassword, recoveryCode);
+
+            if (result.status !== Statuses.Success) {
+                console.error('Error:', result);
+    
+                res
+                    .status(HttpStatus.BadRequest)
+                    .json({ errorsMessages: result.extensions });
+    
+                return;
+            }
+    
+            res.sendStatus(HttpStatus.NoContent);
+    
+            return;
+                
+        } catch (e: unknown) {
+            res.sendStatus(HttpStatus.InternalServerError);
+        }
+    }
 }

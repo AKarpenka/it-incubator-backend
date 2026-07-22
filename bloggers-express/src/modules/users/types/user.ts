@@ -1,6 +1,11 @@
 import { TPaginationAndSorting } from "../../../core/types/sortingPagination";
 import { UsersSortBy } from "../constants";
 
+type TPasswordRecovery = {
+    recoveryCode: string;
+    expirationDate: Date,
+}
+
 export type TUser = {
     login: string;
     email: string;
@@ -11,6 +16,7 @@ export type TUser = {
         expirationDate: Date,
         isConfirmed: boolean
     }
+    passwordRecovery?: TPasswordRecovery;
 }
 
 export type TUserQueryInput = TPaginationAndSorting<UsersSortBy> & {

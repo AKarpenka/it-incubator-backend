@@ -41,4 +41,38 @@ export class UsersRepository {
 
         return { user: result };
     }
+
+    async updateRecoveryCode(userId: ObjectId): Promise<{user: WithId<TUser> | null}> {
+        const result = await usersCollection.findOneAndUpdate(
+            { _id: userId },
+            { 
+                $set: { 
+                    'passwordRecovery.recoveryCode': uuid(),
+                    'passwordRecovery.expirationDate': add(new Date(), { minutes: 1 })
+                } 
+            },
+            { returnDocument: 'after' },
+        );
+
+        return { user: result };
+    }
+
+
+    async updateUserPassword(userId: ObjectId, newPassword: string): Promise<{user: WithId<TUser> | null}> {
+        const result = await usersCollection.findOneAndUpdate(
+            { _id: userId },
+            { 
+                $set: { 
+                    password: newPassword
+                } ,
+                $unset: {
+                    'passwordRecovery.recoveryCode': '',
+                    'passwordRecovery.expirationDate': ''
+                }
+            },
+            { returnDocument: 'after' },
+        );
+
+        return { user: result };
+    }
 }

@@ -6,7 +6,6 @@ import { UsersQueryRepository } from "../../../modules/users/repositories/users.
 import { JwtService } from '../../../core/adapters/jwt.service';
 import { UsersService } from '../../../modules/users/application/users.service';
 import { TUserDTO } from '../../../modules/users/repositories/dto/users-input.dto';
-import { SETTINGS } from '../../../core/settings/settings';
 import { WithId } from 'mongodb';
 import { TUser } from '../../../modules/users/types/user';
 import { UsersRepository } from '../../../modules/users/repositories/user.repository';
@@ -15,6 +14,7 @@ import { TDevice } from '../../../modules/devices/types/device';
 import { v4 as uuid } from 'uuid';
 import { DevicesQueryRepository } from '../../../modules/devices/repositories/devices.query-repository';
 import { inject, injectable } from 'inversify';
+import { getRecoveryPasswordMessage, getRegistrationMessage, RECOVERY_SUBJECT, REGISTRATION_SUBJECT } from './constants';
 
 @injectable()
 export class AuthService {
@@ -147,7 +147,11 @@ export class AuthService {
             };
         }
 
-        this.sendEmail(newUser);
+        this.sendEmail({
+            user: newUser,
+            subject: REGISTRATION_SUBJECT, 
+            message: getRegistrationMessage(newUser.emailConfirmation.confirmationCode)
+        });
 
         return {
             status: Statuses.Success,
@@ -227,7 +231,11 @@ export class AuthService {
             };
         }
 
-        this.sendEmail(updatedUser);
+        this.sendEmail({
+            user: updatedUser, 
+            subject: REGISTRATION_SUBJECT, 
+            message: getRegistrationMessage(updatedUser.emailConfirmation.confirmationCode)
+        });
 
         return {
             status: Statuses.Success,
@@ -290,17 +298,73 @@ export class AuthService {
         };
     }
 
-    private sendEmail (user: WithId<TUser>) {
-        // тут хардкод, который на фронт отправляет рандомную ссылку с кодом подтверждения
-        // и затем фронт еще один пост запрос делает для вызова логики подтверждения 
-        const subject = 'Registration confirm';
-        const message = `
-            <h1>Thank for your registration</h1>
-            <p>To finish registration please follow the link below:
-                <a href='${SETTINGS.PATH.BASE_URL}${SETTINGS.PATH.AUTH}/registration-confirmation?code=${user.emailConfirmation.confirmationCode}'>complete registration</a>
-            </p>
-        `;
+    async passwordRecovery(email: string) {
+        const existingUser = await this.usersQueryRepository.findByLoginOrEmail(email);
 
+        if(!existingUser) {
+            return {
+                status: Statuses.Success,
+                data: {},
+                extensions: [],
+            };
+        }
+
+        const { user } = await this.usersRepository.updateRecoveryCode(existingUser._id);
+
+        this.sendEmail({
+            user: existingUser,
+            subject: RECOVERY_SUBJECT, 
+            message: getRecoveryPasswordMessage(user?.passwordRecovery?.recoveryCode || '')
+        });
+
+        return {
+            status: Statuses.Success,
+            data: {},
+            extensions: [],
+        };
+    }
+
+     async updateUserPassword (newPassword: string, recoveryCode: string): Promise<Result<WithId<TUser> | null>> {
+        const { user: userByCode } = await this.usersQueryRepository.findUserByRecoveryCode(recoveryCode);
+
+        if(!userByCode || !userByCode.passwordRecovery) {
+            return {
+                status: Statuses.NotFound,
+                data: null,
+                errorMessage: 'Not Found User',
+                extensions: [{ field: 'code', message: 'Not found user by this confirmation code' }],
+            };
+        }
+
+        if(userByCode.passwordRecovery.expirationDate < new Date()) {
+            return {
+                status: Statuses.BadRequest,
+                data: null,
+                errorMessage: 'recovery code expired',
+                extensions: [{ field: 'recoveryCode', message: 'recovery code expired' }],
+            };
+        }
+
+        const passwordHash = await this.argon2Service.generateHash(newPassword);
+
+        const { user: updatedUser } = await this.usersRepository.updateUserPassword(userByCode._id, passwordHash);
+
+        return {
+            status: Statuses.Success,
+            data: updatedUser,
+            extensions: [],
+        };
+    }
+
+    private sendEmail ({
+        user,
+        subject,
+        message,
+    }: {
+        user: WithId<TUser>,
+        subject: string,
+        message: string,
+    }) {
         this.nodemailerService
             .sendEmail(user.email, subject, message)
             .catch((error: unknown) => console.error('error in send email:', error));

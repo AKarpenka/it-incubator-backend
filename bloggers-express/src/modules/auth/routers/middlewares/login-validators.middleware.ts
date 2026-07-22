@@ -1,13 +1,13 @@
 import { body } from "express-validator";
 
-export const loginOrEmailValidator = body('loginOrEmail')
+const loginOrEmailValidator = body('loginOrEmail')
     .isString()
     .withMessage('loginOrEmail should be string')
     .trim()
     .notEmpty()
     .withMessage('loginOrEmail shouldnt be empty')
 
-export const passwordValidator = body('password')
+const passwordValidator = body('password')
     .isString()
     .withMessage('password should be string')
     .trim()

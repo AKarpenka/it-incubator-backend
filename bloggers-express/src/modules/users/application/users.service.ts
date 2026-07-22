@@ -38,7 +38,7 @@ export class UsersService {
         return await this.usersQueryRepository.getUserById(insertedId);
     }
 
-    async deleteUser (id: string): Promise<string | null> {
+    async deleteUser(id: string): Promise<string | null> {
         if(!ObjectId.isValid(id)) {
             return Promise.resolve(null);
         }

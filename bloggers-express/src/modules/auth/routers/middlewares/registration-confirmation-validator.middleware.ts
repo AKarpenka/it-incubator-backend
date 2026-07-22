@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 
-export const codeValidator = body('code')
+const codeValidator = body('code')
     .isString()
     .withMessage('code should be string')
     .trim()
