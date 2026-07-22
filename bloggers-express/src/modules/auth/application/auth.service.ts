@@ -324,15 +324,15 @@ export class AuthService {
         };
     }
 
-     async updateUserPassword (newPassword: string, recoveryCode: string): Promise<Result<WithId<TUser> | null>> {
+    async updateUserPassword (newPassword: string, recoveryCode: string): Promise<Result<WithId<TUser> | null>> {
         const { user: userByCode } = await this.usersQueryRepository.findUserByRecoveryCode(recoveryCode);
 
         if(!userByCode || !userByCode.passwordRecovery) {
             return {
-                status: Statuses.NotFound,
+                status: Statuses.BadRequest,
                 data: null,
                 errorMessage: 'Not Found User',
-                extensions: [{ field: 'code', message: 'Not found user by this confirmation code' }],
+                extensions: [{ field: 'recoveryCode', message: 'Not found user by this recovery code' }],
             };
         }
 
