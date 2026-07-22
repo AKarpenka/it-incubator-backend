@@ -1,8 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import { HttpStatus } from "../../core/types/httpStatuses";
-import { jwtService } from "../../core/adapters/jwt.service";
+import { JwtService } from "../../core/adapters/jwt.service";
+import { container } from "../../modules/composition-root";
 
 const TYPE_OF_AUTH = `Bearer`;
+
+const jwtService = container.get(JwtService);
 
 export const accessTokenMiddleware = (
     req: Request,

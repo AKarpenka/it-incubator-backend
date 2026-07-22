@@ -1,37 +1,44 @@
 import { ObjectId, WithId } from "mongodb";
-import { postsRepository } from "../repositories/posts.repository";
+import { PostsRepository } from "../repositories/posts.repository";
 import { TPost, TPostQueryInput } from "../types/post";
 import {  TPostDTO } from "./dto/posts-input.dto";
-import { blogsRepository } from "../../../modules/blogs/repositories/blogs.repository";
+import { BlogsRepository } from "../../../modules/blogs/repositories/blogs.repository";
 import { TBlog } from "../../../modules/blogs/types/blog";
+import { inject, injectable } from "inversify";
 
-export const postsService = {
-    getPosts: async (queryDto: TPostQueryInput): Promise<{ items: WithId<TPost>[]; totalCount: number }> => {
-        return await postsRepository.getPosts(queryDto);
-    },
+@injectable()
+export class PostsService {
+    constructor(
+        @inject(BlogsRepository) protected blogsRepository: BlogsRepository, 
+        @inject(PostsRepository) protected postsRepository: PostsRepository
+    ) {}
 
-    getPostById: async (id: string): Promise<WithId<TPost> | null> => {
+    async getPosts (queryDto: TPostQueryInput): Promise<{ items: WithId<TPost>[]; totalCount: number }> {
+        return await this.postsRepository.getPosts(queryDto);
+    }
+
+    async getPostById (id: string): Promise<WithId<TPost> | null> {
         if (!ObjectId.isValid(id)) {
             return Promise.resolve(null);
         }
 
-        return await postsRepository.getPostById(id);
-    },
+        return await this.postsRepository.getPostById(id);
+    }
 
-    getPostsByBlogId: async (
+    async getPostsByBlogId (
         blogId: string, 
         queryDto: TPostQueryInput
-    ): Promise<{ items: WithId<TPost>[]; totalCount: number }> => {
-        return await postsRepository.getPosts(queryDto, blogId);
-    },
+    ): Promise<{ items: WithId<TPost>[]; totalCount: number }> {
+        return await this.postsRepository.getPosts(queryDto, blogId);
+    }
 
-    createPost: async (post: TPostDTO, blogId?: string): Promise<WithId<TPost> | null> => {
+    async createPost(post: TPostDTO, blogId?: string): Promise<WithId<TPost> | null> {
         let blog: WithId<TBlog> | null = null;
 
         if(blogId) {
-            blog = await blogsRepository.getBlogById(blogId);
+            blog = await this.blogsRepository.getBlogById(blogId);
         } else if (post.blogId) {
-            blog = await blogsRepository.getBlogById(post.blogId);
+            blog = await this.blogsRepository.getBlogById(post.blogId);
         }
 
         if(!blog) {
@@ -48,28 +55,28 @@ export const postsService = {
             createdAt: new Date().toISOString(),
         };
 
-        return await postsRepository.createPost(newPost);
-    },
+        return await this.postsRepository.createPost(newPost);
+    }
 
-    updatePostById: async (id: string, post: TPostDTO): Promise<WithId<TPost> | null> => {
+    async updatePostById (id: string, post: TPostDTO): Promise<WithId<TPost> | null> {
         if (!ObjectId.isValid(id)) {
             return null;
         };
 
-        return await postsRepository.updatePostById(id, post);
-    },
+        return await this.postsRepository.updatePostById(id, post);
+    }
 
-    deletePostById: async (id: string): Promise<string | null> => {
+    async deletePostById (id: string): Promise<string | null> {
         if (!ObjectId.isValid(id)) {
             return null;
         };
 
-        const deletedPost = await postsRepository.deletePostById(id);
+        const deletedPost = await this.postsRepository.deletePostById(id);
         
         if (deletedPost.deletedCount < 1) {
             return null;
         }
 
         return id;
-    },
+    }
 };

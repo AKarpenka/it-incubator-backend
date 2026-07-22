@@ -1,20 +1,26 @@
 import { ObjectId, WithId } from "mongodb";
-import { blogsRepository } from "../repositories/blogs.repository";
+import { BlogsRepository } from "../repositories/blogs.repository";
 import { TBlog, TBlogQueryInput } from "../types/blog";
 import { TBlogDTO } from "./dto/blogs-input.dto";
+import { inject, injectable } from 'inversify';
 
-export const blogsService = {
+@injectable()
+export class BlogsService {
+    constructor(
+        @inject(BlogsRepository) protected blogsRepository: BlogsRepository
+    ) {}
+
     async getBlogs(queryDto: TBlogQueryInput): Promise<{ items: WithId<TBlog>[]; totalCount: number }> {
-        return await blogsRepository.getBlogs(queryDto);
-    },
+        return await this.blogsRepository.getBlogs(queryDto);
+    }
 
     async getBlogById(id: string): Promise<WithId<TBlog> | null> {
         if (!ObjectId.isValid(id)) {
             return Promise.resolve(null);
         }
 
-        return await blogsRepository.getBlogById(id);
-    },
+        return await this.blogsRepository.getBlogById(id);
+    }
 
     async createBlog(blog: TBlog): Promise<WithId<TBlog>> {
         const newBlog: TBlog = {
@@ -23,28 +29,28 @@ export const blogsService = {
             isMembership: false,
         };
 
-        const insertedId = await blogsRepository.createBlog(newBlog);
+        const insertedId = await this.blogsRepository.createBlog(newBlog);
 
         return {
             ...newBlog, 
             _id: insertedId,
         };
-    },
+    }
 
     async updateBlogById(id: string, blog: TBlogDTO): Promise<WithId<TBlog> | null> {
         if (!ObjectId.isValid(id)) {
             return null;
         };
 
-        return await blogsRepository.updateBlogById(id, blog);
-    },
+        return await this.blogsRepository.updateBlogById(id, blog);
+    }
 
     async deleteBlogById(id: string): Promise<string | null> {
         if (!ObjectId.isValid(id)) {
             return null;
         };
 
-        const deletedBlog = await blogsRepository.deleteBlogById(id);
+        const deletedBlog = await this.blogsRepository.deleteBlogById(id);
 
         if (deletedBlog.deletedCount < 1) {
             return null;

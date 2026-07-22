@@ -2,13 +2,17 @@ import { TRateLimit } from "../../../middlewares/rateLimit/types";
 import { rateLimitCollection } from "../../../db/db";
 import { Filter, ObjectId } from "mongodb/mongodb";
 import { getTenSecondsAgoFromNow } from "./helpers";
+import { injectable } from "inversify";
 
-export const rateLimitRepository = {
-    createRequest: async (newRequest: TRateLimit): Promise<{ insertedId: ObjectId }> => ({
+@injectable()
+export class RateLimitRepository {
+    async createRequest (newRequest: TRateLimit): Promise<{ insertedId: ObjectId }> {
+        return {
         insertedId: (await rateLimitCollection.insertOne(newRequest)).insertedId
-    }),
+        }
+    }
 
-    cleanRequests: async(query: Filter<{ip: string; url: string}>) => {
+    async cleanRequests (query: Filter<{ip: string; url: string}>) {
         const filter = {
             ...query,
             date: { $lt: getTenSecondsAgoFromNow() }
@@ -17,5 +21,5 @@ export const rateLimitRepository = {
         await rateLimitCollection.deleteMany(filter);
 
         return;
-    },
+    }
 }

@@ -2,9 +2,11 @@ import jwt from 'jsonwebtoken';
 import { WithId } from 'mongodb';
 import { TUser } from '../../modules/users/types/user';
 import { SETTINGS } from '../settings/settings';
+import { injectable } from 'inversify';
 
-export const jwtService = {
-    createAccessToken: (user: WithId<TUser>): { accessToken: string } => {
+@injectable()
+export class JwtService {
+    createAccessToken(user: WithId<TUser>): { accessToken: string } { 
         const payload = {
             email: user.email,
             login: user.login,
@@ -22,9 +24,9 @@ export const jwtService = {
         return {
             accessToken
         }
-    },
+    }
 
-    verifyAccessToken: (token: string): { userId: string } | null => {
+    verifyAccessToken(token: string): { userId: string } | null {
         try {
             const payload = jwt.verify(token, SETTINGS.SECRET_KEY) as jwt.JwtPayload & { userId: string };
             if (!payload.userId) {
@@ -34,9 +36,9 @@ export const jwtService = {
         } catch {
             return null;
         }
-    },
+    }
 
-    verifyRefreshToken: (token: string): { userId: string; deviceId: string; iat: number } | null => {
+    verifyRefreshToken(token: string): { userId: string; deviceId: string; iat: number } | null {
         try {
             const payload = jwt.verify(token, SETTINGS.SECRET_KEY) as jwt.JwtPayload & {
                 userId: string;
@@ -53,9 +55,9 @@ export const jwtService = {
         } catch {
             return null;
         }
-    },
+    }
 
-    createRefreshToken: (userId: string, deviceId: string): { refreshToken: string } => {
+    createRefreshToken(userId: string, deviceId: string): { refreshToken: string } {
         const payload = {
             userId,
             deviceId,
@@ -70,9 +72,9 @@ export const jwtService = {
         );
 
         return { refreshToken };
-    },
+    }
 
-    decodePayloadToken: <T>(token: string): T => {
+    decodePayloadToken<T>(token: string): T {
         return jwt.decode(token) as T;
     }
 }

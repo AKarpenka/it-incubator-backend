@@ -1,8 +1,10 @@
 import nodemailer from 'nodemailer';
 import { SETTINGS } from '../settings/settings';
+import { injectable } from 'inversify';
 
-export const nodemailerService = {
-    sendEmail: async (email: string, subject: string, message: string,): Promise<boolean> => {
+@injectable()
+export class NodemailerService {
+    async sendEmail(email: string, subject: string, message: string,): Promise<boolean> {
         const transport = nodemailer.createTransport({
             host: 'smtp.gmail.com',
             port: 587,

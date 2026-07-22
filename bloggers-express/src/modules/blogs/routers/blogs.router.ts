@@ -2,14 +2,20 @@ import { Router } from "express";
 import { blogsValidatorMiddleware } from "./middlewares/blogs-validators.middleware";
 import { errorsResultMiddleware } from "../../../middlewares/validation/errors-result.middleware";
 import { authorizationMiddleware } from "../../../middlewares/auth/basic-auth-middleware";
-import { createPostByBlogHandler, createBlogHandler, deleteBlogByIdHandler, getBlogsByIdHandler, getBlogsHandler, getPostsByBlogHandler, updateBlogByIdHandler } from "./handlers";
+import { BlogsController } from "./controller";
 import { idValidation } from "../../../middlewares/validation/id-validators.middleware";
 import { paginationAndSortingValidation } from "../../../middlewares/validation/pagination-sorting-validation.middleware";
 import { BlogsSortBy } from "../constants";
 import { postsByBlogValidatorMiddleware } from "./middlewares/posts-by-blog-validators.middleware";
 import { PostsSortBy } from "../../posts/constants";
+import { container } from "../../composition-root";
 
 export const blogsRouter = Router();
+
+/* INFO: Пример применения собсвенного ioc контейнера для DI */
+// const blogsControllerInstance = ioc.getInstance<BlogsController>(BlogsController)
+
+const blogsControllerInstance = container.get(BlogsController);
 
 blogsRouter
     .get(
@@ -17,21 +23,21 @@ blogsRouter
         idValidation, 
         paginationAndSortingValidation(PostsSortBy), 
         errorsResultMiddleware, 
-        getPostsByBlogHandler
+        blogsControllerInstance.getPostsByBlogHandler.bind(blogsControllerInstance)
     )
-    .get('/:id', idValidation, errorsResultMiddleware, getBlogsByIdHandler)
+    .get('/:id', idValidation, errorsResultMiddleware, blogsControllerInstance.getBlogsByIdHandler.bind(blogsControllerInstance))
     .get(
         '/',  
         paginationAndSortingValidation(BlogsSortBy), 
         errorsResultMiddleware,
-        getBlogsHandler
+        blogsControllerInstance.getBlogsHandler.bind(blogsControllerInstance)
     )
 
     .delete('/:id', 
         authorizationMiddleware,
         idValidation,
         errorsResultMiddleware,
-        deleteBlogByIdHandler,
+        blogsControllerInstance.deleteBlogByIdHandler.bind(blogsControllerInstance),
     )
 
     .post('/:id/posts', 
@@ -39,13 +45,13 @@ blogsRouter
         idValidation,
         ...postsByBlogValidatorMiddleware,
         errorsResultMiddleware,
-        createPostByBlogHandler,
+        blogsControllerInstance.createPostByBlogHandler.bind(blogsControllerInstance),
     )
     .post('/', 
         authorizationMiddleware, 
         ...blogsValidatorMiddleware,
         errorsResultMiddleware,
-        createBlogHandler
+        blogsControllerInstance.createBlogHandler.bind(blogsControllerInstance), 
     )
 
     .put('/:id', 
@@ -53,5 +59,5 @@ blogsRouter
         idValidation,
         ...blogsValidatorMiddleware,
         errorsResultMiddleware,
-        updateBlogByIdHandler
+        blogsControllerInstance.updateBlogByIdHandler.bind(blogsControllerInstance),
     );

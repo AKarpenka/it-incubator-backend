@@ -1,18 +1,18 @@
 import { Router } from "express";
 import { refreshTokenMiddleware } from "../../../middlewares/auth/refresh-token.middleware";
-import { getDevicesHandler } from "./handlers/get-devices.handler";
-import { deleteDeviceByIdHandler } from "./handlers/delete-device-by-id.handler";
 import { deviceIdValidation } from "./middlewares/id-validators.middleware";
 import { errorsResultMiddleware } from "../../../middlewares/validation/errors-result.middleware";
-import { deleteAllDevicesHandler } from "./handlers/delete-all-devices.handler";
+import { DevicesController } from "./controller";
+import { container } from "../../composition-root";
 
 export const devicesRouter = Router();
+const devicesControllerInstance = container.get(DevicesController);
 
 devicesRouter
     .get(
         '/', 
         refreshTokenMiddleware,
-        getDevicesHandler
+        devicesControllerInstance.getDevicesHandler.bind(devicesControllerInstance)
     )
 
     .delete(
@@ -20,12 +20,12 @@ devicesRouter
         refreshTokenMiddleware,
         deviceIdValidation,
         errorsResultMiddleware,
-        deleteDeviceByIdHandler
+        devicesControllerInstance.deleteDeviceByIdHandler.bind(devicesControllerInstance)
     )
 
     // Удвлить все сессии, кроме текущей 
     .delete(
         '/',
         refreshTokenMiddleware,
-        deleteAllDevicesHandler
+        devicesControllerInstance.deleteAllDevicesHandler.bind(devicesControllerInstance)
     )

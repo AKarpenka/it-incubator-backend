@@ -1,8 +1,11 @@
 import { NextFunction, Request, Response } from "express";
-import { rateLimitService } from "../../modules/rateLimit/application/rate-limit.service";
+import { RateLimitService } from "../../modules/rateLimit/application/rate-limit.service";
 import { HttpStatus } from "../../core/types/httpStatuses";
+import { container } from "../../modules/composition-root";
 
 const ALLOWED_COUNT_OF_REQUESTS = 5;
+
+const rateLimitService = container.get(RateLimitService);
 
 export const rateLimitMiddleware = async (
     req: Request,

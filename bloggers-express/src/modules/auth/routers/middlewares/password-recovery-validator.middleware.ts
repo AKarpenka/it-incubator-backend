@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 
-const emailValidator = body('email')
+const userEmailValidator = body('email')
     .isString()
     .withMessage('Email should be string')
     .notEmpty()
@@ -8,6 +8,6 @@ const emailValidator = body('email')
     .matches(/^[\w.+-]+@([\w-]+\.)+[\w-]{2,4}$/)
     .withMessage('Email should looks like example@example.com')
 
-export const registrationEmailResendingValidatorMiddleware = [
-    emailValidator
+export const passwordRecoveryValidatorMiddleware = [
+    userEmailValidator,
 ];
