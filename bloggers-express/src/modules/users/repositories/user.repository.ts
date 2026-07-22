@@ -47,8 +47,10 @@ export class UsersRepository {
             { _id: userId },
             { 
                 $set: { 
-                    'passwordRecovery.recoveryCode': uuid(),
-                    'passwordRecovery.expirationDate': add(new Date(), { hours: 1 })
+                    passwordRecovery: {
+                        recoveryCode: uuid(),
+                        expirationDate: add(new Date(), { minutes: 1 })
+                    }
                 } 
             },
             { returnDocument: 'after' },
@@ -66,8 +68,7 @@ export class UsersRepository {
                     password: newPassword
                 } ,
                 $unset: {
-                    'passwordRecovery.recoveryCode': '',
-                    'passwordRecovery.expirationDate': ''
+                    passwordRecovery: ""
                 }
             },
             { returnDocument: 'after' },

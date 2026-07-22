@@ -5,6 +5,8 @@ npm run watch - перебилживать ts
 npm run dev - обновлять ноду
 npm run dev:watch - npm run watch + npm run dev - основная очка входа
 
+для проверки писем - впн компании + ssh -R 80:localhost:3003 nokey@localhost.run
+
 как с нуля все это добро собрать:
 1. после клонирования репозитория
 2. npm i

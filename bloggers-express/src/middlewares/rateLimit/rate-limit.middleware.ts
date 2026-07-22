@@ -12,19 +12,23 @@ export const rateLimitMiddleware = async (
     res: Response, 
     next: NextFunction,
 ) => {
-    const ip = req.ip ?? 'unknown';
-    const url = req.originalUrl || req.baseUrl;
+    try {
+        const ip = req.ip ?? 'unknown';
+        const url = req.originalUrl || req.baseUrl;
 
-    const existingRequest = await rateLimitService.getRequestByIpAndUrl(ip, url);
+        const existingRequest = await rateLimitService.getRequestByIpAndUrl(ip, url);
 
-    if(existingRequest.data && existingRequest.data?.totalCount >= ALLOWED_COUNT_OF_REQUESTS) {
-        res
-            .sendStatus(HttpStatus.TooManyRequests);
+        if(existingRequest.data && existingRequest.data?.totalCount >= ALLOWED_COUNT_OF_REQUESTS) {
+            res
+                .sendStatus(HttpStatus.TooManyRequests);
 
-        return;
-    } else  {
-        await rateLimitService.createNewRequest(ip, url);
+            return;
+        } else  {
+            await rateLimitService.createNewRequest(ip, url);
+        }
+
+        next();
+    } catch (error) {
+        res.sendStatus(HttpStatus.InternalServerError);
     }
-
-    next();
 }
